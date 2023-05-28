@@ -42,6 +42,47 @@ const deletePost = async (req, res) => {
 
 }
 
+const getAllPost = async (req, res) => {
+    try {
+        const posts = await Post.find().populate('author', '-password -email -updatedAt -createdAt');
+        return res.status(200).json(posts);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const editPost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { content } = req.body;
+        
+        const user = req.user;
+
+        const existingUser = await User.findById(user);
+        if (!existingUser) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const existingPost = await Post.findById(postId);
+        if (!existingPost) {
+            return res.status(401).json({ message: 'Post not found' });
+        }
+
+        if (existingUser._id.toString() !== existingPost.author.toString()) {
+            return res.status(401).json({ message: 'Unauthorized user' });
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(postId, { content }, { new: true });
+        if (!updatedPost) {
+            throw new Error('Failed to update post');
+        }
+
+        return res.status(200).json({ message: 'Post edited successfully', post: updatedPost });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
 
 
 
@@ -50,4 +91,8 @@ const deletePost = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost }
+
+
+
+
+module.exports = { createPost, deletePost, getAllPost, editPost }

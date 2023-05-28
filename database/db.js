@@ -1,17 +1,18 @@
-import mongoose from 'mongoose'
-import dotenv from 'dotenv'
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
 dotenv.config()
 
 const URL = process.env.MONGO_URL
 mongoose.set('strictQuery', true)
 
- const connectToMongo = async () => {
+const connectToMongo = async () => {
     try {
-        let db =await mongoose.connect(URL);
+        let db = await mongoose.connect(URL);
         console.log(db.connection.host);
     } catch (error) {
         console.log(error);
     }
 
 }
-export default connectToMongo;
+module.exports = connectToMongo 

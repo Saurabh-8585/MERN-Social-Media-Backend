@@ -1,25 +1,45 @@
+const getDataUri = require('../config/DataUri');
 const Post = require('../models/Post')
 const User = require('../models/User')
+const cloudinary = require('../config/cloudinary');
 
 
 const createPost = async (req, res) => {
-    const { content } = req.body;
-    let user = req.user;
-    const isUser = await User.findById(user);
-    if (!isUser) {
+    const { content, image } = req.body;
+
+    const file = req.file;
+    const fileUri = getDataUri(file);
+    console.log(fileUri);
+    const user = await User.findById(req.user);
+
+    if (!user) {
         return res.status(401).json({ message: 'User not found' });
     }
+
     try {
+
+        const myCloud = await cloudinary.uploader.upload(fileUri.content);
+       
+
         const newPost = new Post({
             content,
-            author: isUser._id,
+            author: user._id,
+            postImage: {
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url,
+            },
         });
-        await newPost.save();
-        return res.status(200).json({ message: 'Posted successfully' });
+
+        const savedPost = await newPost.save().populate('author', '-password -updatedAt -createdAt');
+
+        return res.status(200).json(savedPost);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+
 
 const deletePost = async (req, res) => {
     const { postId } = req.params;
@@ -44,7 +64,7 @@ const deletePost = async (req, res) => {
 
 const getAllPost = async (req, res) => {
     try {
-        const posts = await Post.find().populate('author', '-password -email -updatedAt -createdAt');
+        const posts = await Post.find().populate('author', '-password  -updatedAt -createdAt').sort({ createdAt: -1 });
         return res.status(200).json(posts);
     } catch (error) {
         return res.status(500).json({ message: 'Server error' });
@@ -55,7 +75,7 @@ const editPost = async (req, res) => {
     try {
         const { postId } = req.params;
         const { content } = req.body;
-        
+
         const user = req.user;
 
         const existingUser = await User.findById(user);

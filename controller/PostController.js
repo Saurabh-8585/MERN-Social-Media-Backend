@@ -5,11 +5,9 @@ const cloudinary = require('../config/cloudinary');
 
 
 const createPost = async (req, res) => {
-    const { content, image } = req.body;
-
+    const { content } = req.body;
     const file = req.file;
-    const fileUri = getDataUri(file);
-    console.log(fileUri);
+
     const user = await User.findById(req.user);
 
     if (!user) {
@@ -18,23 +16,32 @@ const createPost = async (req, res) => {
 
     try {
 
-        const myCloud = await cloudinary.uploader.upload(fileUri.content);
-       
+        let myCloud;
+        if (file) {
+            const fileUri = getDataUri(file);
+            myCloud = await cloudinary.uploader.upload(fileUri.content, {
+                folder: 'Snapia',
+            });
+        }
 
         const newPost = new Post({
             content,
             author: user._id,
-            postImage: {
-                public_id: myCloud.public_id,
-                url: myCloud.secure_url,
-            },
+            postImage: file
+                ? {
+                    public_id: myCloud.public_id,
+                    url: myCloud.secure_url,
+                }
+                : undefined,
         });
 
-        const savedPost = await newPost.save().populate('author', '-password -updatedAt -createdAt');
+        const savedPost = await newPost.save();
+        await savedPost.populate('author', '-password -updatedAt -createdAt');
 
         return res.status(200).json(savedPost);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.log(error);
+        // res.status(500).json({ message: 'Server error' });
     }
 };
 

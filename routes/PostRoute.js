@@ -13,7 +13,7 @@ const upload = require('../config/multer');
 const router = express.Router();
 
 router.get('/getposts', getAllPost);
-router.post('/newpost', authMiddleware, upload, createPost);
+router.post('/newpost', upload, authMiddleware, createPost);
 router.delete('/deletepost/:postId', authMiddleware, deletePost);
 router.put('/editpost/:postId', authMiddleware, editPost);
 

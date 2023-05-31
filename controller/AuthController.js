@@ -26,11 +26,9 @@ const SignUp = async (req, res) => {
 
         await newUser.save();
         const token = generateToken(newUser);
-        res.cookie('token', token, {
-            httpOnly: true,
-        });
+        res.cookie('token', token);
 
-        res.status(200).json({ message: 'Sign Up successfully', token });
+        res.status(200).json({ message: `Welcome  ${newUser.username}`, token });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -52,11 +50,9 @@ const SignIn = async (req, res) => {
 
         const token = generateToken(user);
 
-        res.cookie('token', token, {
-            httpOnly: true,
-        });
+        res.cookie('token', token);
 
-        res.status(200).json({ message: 'Sign In successfully', token });
+        res.status(200).json({ message: `Welcome Back ${user.username}`, token });
     } catch (error) {
 
         res.status(500).json({ message: 'Server error' });

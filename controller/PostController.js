@@ -49,14 +49,15 @@ const createPost = async (req, res) => {
 
 
 const deletePost = async (req, res) => {
-    const { postId } = req.params;
+    const { id } = req.params;
+    console.log(id);
     let user = req.user;
     const isUser = await User.findById(user);
     if (!isUser) {
         return res.status(401).json({ message: 'User not found' });
     }
 
-    const isPostAvailable = await Post.findById(postId);
+    const isPostAvailable = await Post.findById(id);
     if (!isPostAvailable) {
         return res.status(401).json({ message: 'Post not found' });
     }
@@ -64,6 +65,7 @@ const deletePost = async (req, res) => {
         await Post.findByIdAndDelete(isPostAvailable._id)
         return res.status(200).json({ message: 'Posted Deleted successfully' });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Server error' });
     }
 

@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectToMongo = require('./database/db');
 const auth = require('./routes/AuthRoute');
 const post = require('./routes/PostRoute');
+const user = require('./routes/UserRoute');
 const checkOrigin = require('./middleware/ApiAuth');
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(cors());
 
 app.use('/api/auth', auth);
 app.use('/api/post', post);
+app.use('/api/user', user);
 
 app.listen(port, () => {
   console.log(`E-commerce backend listening at http://localhost:${port}`);

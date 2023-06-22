@@ -5,7 +5,8 @@ const {
     deletePost,
     getAllPost,
     editPost,
-    singleUserPots
+    singleUserPosts,
+
 }
     = require('../controller/PostController');
 const upload = require('../config/multer');
@@ -13,11 +14,11 @@ const upload = require('../config/multer');
 
 const router = express.Router();
 
-router.get('/getposts', getAllPost);
-router.get('/userposts/:id', singleUserPots);
-router.post('/newpost', upload, authMiddleware, createPost);
-router.delete('/deletepost/:id', authMiddleware, deletePost);
-router.put('/editpost/:postId',upload, authMiddleware, editPost);
+router.get('/posts', getAllPost);
+router.get('/user/:id', singleUserPosts);
+router.post('/new', upload, authMiddleware, createPost);
+router.delete('/delete/:id', authMiddleware, deletePost);
+router.put('/edit/:postId', upload, authMiddleware, editPost);
 
 
 module.exports = router

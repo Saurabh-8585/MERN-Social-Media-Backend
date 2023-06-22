@@ -86,6 +86,8 @@ const editPost = async (req, res) => {
     try {
 
         const existingUser = await User.findById(user);
+        const existingPost = await Post.findById(postId);
+        
         if (!existingUser) {
             return res.status(401).json({ message: 'User not found' });
         }
@@ -93,7 +95,6 @@ const editPost = async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized user' });
         }
 
-        const existingPost = await Post.findById(postId);
         if (!existingPost) {
             return res.status(404).json({ message: 'Post not found' });
         }
@@ -107,7 +108,7 @@ const editPost = async (req, res) => {
     }
 };
 
-const singleUserPots = async (req, res) => {
+const singleUserPosts = async (req, res) => {
     const { id } = req.params;
     try {
         const findUserPosts = await Post.find({ author: id });
@@ -130,4 +131,6 @@ const singleUserPots = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPots }
+
+
+module.exports = { createPost, deletePost, getAllPost, editPost,  singleUserPosts }

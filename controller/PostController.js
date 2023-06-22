@@ -8,6 +8,8 @@ const createPost = async (req, res) => {
     const { content } = req.body;
     const file = req.file;
 
+    // console.log({content});
+
     const user = await User.findById(req.user);
 
     if (!user) {
@@ -45,12 +47,8 @@ const createPost = async (req, res) => {
     }
 };
 
-
-
-
 const deletePost = async (req, res) => {
     const { id } = req.params;
-    console.log(id);
     let user = req.user;
     const isUser = await User.findById(user);
     if (!isUser) {
@@ -81,31 +79,27 @@ const getAllPost = async (req, res) => {
 };
 
 const editPost = async (req, res) => {
+    const { postId } = req.params;
+    const { content } = req.body;
+    const file = req.file;
+    const user = req.user;
     try {
-        const { postId } = req.params;
-        const { content } = req.body;
-
-        const user = req.user;
 
         const existingUser = await User.findById(user);
         if (!existingUser) {
             return res.status(401).json({ message: 'User not found' });
         }
-
-        const existingPost = await Post.findById(postId);
-        if (!existingPost) {
-            return res.status(401).json({ message: 'Post not found' });
-        }
-
         if (existingUser._id.toString() !== existingPost.author.toString()) {
             return res.status(401).json({ message: 'Unauthorized user' });
         }
 
-        const updatedPost = await Post.findByIdAndUpdate(postId, { content }, { new: true });
-        if (!updatedPost) {
-            throw new Error('Failed to update post');
+        const existingPost = await Post.findById(postId);
+        if (!existingPost) {
+            return res.status(404).json({ message: 'Post not found' });
         }
 
+
+        const updatedPost = await Post.findByIdAndUpdate(postId, { content }, { new: true });
         return res.status(200).json({ message: 'Post edited successfully', post: updatedPost });
     } catch (error) {
         console.error(error);
@@ -113,6 +107,17 @@ const editPost = async (req, res) => {
     }
 };
 
+const singleUserPots = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const findUserPosts = await Post.find({ author: id });
+        return res.status(200).json({ post: findUserPosts });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+
+}
 
 
 
@@ -124,4 +129,5 @@ const editPost = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost }
+
+module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPots }

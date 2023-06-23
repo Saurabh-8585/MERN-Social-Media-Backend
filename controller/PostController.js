@@ -2,13 +2,13 @@ const getDataUri = require('../config/DataUri');
 const Post = require('../models/Post')
 const User = require('../models/User')
 const cloudinary = require('../config/cloudinary');
+const BookMark = require('../models/BookMark');
 
 
 const createPost = async (req, res) => {
     const { content } = req.body;
     const file = req.file;
 
-    // console.log({content});
 
     const user = await User.findById(req.user);
 
@@ -38,12 +38,10 @@ const createPost = async (req, res) => {
         });
 
         const savedPost = await newPost.save();
-        await savedPost.populate('author', '-password -updatedAt -createdAt');
 
-        return res.status(200).json(savedPost);
+        return res.status(200).json({ message: 'Posted successfully' });
     } catch (error) {
-        console.log(error);
-        // res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -51,17 +49,19 @@ const deletePost = async (req, res) => {
     const { id } = req.params;
     let user = req.user;
     const isUser = await User.findById(user);
-    if (!isUser) {
-        return res.status(401).json({ message: 'User not found' });
-    }
 
-    const isPostAvailable = await Post.findById(id);
-    if (!isPostAvailable) {
-        return res.status(401).json({ message: 'Post not found' });
-    }
     try {
+        if (!isUser) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const isPostAvailable = await Post.findById(id);
+        if (!isPostAvailable) {
+            return res.status(401).json({ message: 'Post not found' });
+        }
         await Post.findByIdAndDelete(isPostAvailable._id)
-        return res.status(200).json({ message: 'Posted Deleted successfully' });
+        await BookMark.deleteOne({ post: id })
+        return res.status(200).json({ message: 'Post Deleted successfully' });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Server error' });
@@ -81,13 +81,14 @@ const getAllPost = async (req, res) => {
 const editPost = async (req, res) => {
     const { postId } = req.params;
     const { content } = req.body;
+
     const file = req.file;
     const user = req.user;
     try {
 
         const existingUser = await User.findById(user);
         const existingPost = await Post.findById(postId);
-        
+
         if (!existingUser) {
             return res.status(401).json({ message: 'User not found' });
         }
@@ -133,4 +134,4 @@ const singleUserPosts = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost,  singleUserPosts }
+module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts }

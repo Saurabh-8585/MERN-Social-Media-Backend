@@ -7,7 +7,7 @@ const getAllBookMarks = async (req, res) => {
             path: 'post',
             populate: {
                 path: 'author',
-                select: '-password -updatedAt -createdAt -email '
+                select: '-password -updatedAt -createdAt'
             }
         }).select('-user');
         return res.status(200).json(findAllBooksMarks);

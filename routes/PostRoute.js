@@ -7,6 +7,8 @@ const {
     editPost,
     singleUserPosts,
     singlePost,
+    likePost,
+    removeLike,
 
 }
     = require('../controller/PostController');
@@ -26,6 +28,9 @@ router.post('/new', upload, authMiddleware, createPost);
 router.delete('/delete/:id', authMiddleware, deletePost);
 
 router.put('/edit/:postId', upload, authMiddleware, editPost);
+
+router.post('/like', authMiddleware, likePost);
+router.delete('/dislike/:id', authMiddleware, removeLike);
 
 
 module.exports = router

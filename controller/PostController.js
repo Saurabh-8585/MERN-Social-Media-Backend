@@ -1,8 +1,8 @@
-const getDataUri = require('../config/DataUri');
 const Post = require('../models/Post')
 const User = require('../models/User')
-const cloudinary = require('../config/cloudinary');
 const BookMark = require('../models/BookMark');
+const cloudinary = require('../config/cloudinary');
+const getDataUri = require('../config/DataUri');
 
 
 const createPost = async (req, res) => {
@@ -74,7 +74,25 @@ const deletePost = async (req, res) => {
 
 const getAllPost = async (req, res) => {
     try {
-        const posts = await Post.find().populate('author', '-password  -updatedAt -createdAt').sort({ createdAt: -1 });
+        const posts = await Post.find()
+            .populate({
+                path: 'author',
+                select: '-password -updatedAt -createdAt -email'
+            })
+            .populate({
+                path: 'likes',
+                select: '-password -updatedAt -createdAt -email'
+            })
+
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user',
+                    select: '-password -updatedAt -createdAt -email'
+                }
+            })
+            .sort({ createdAt: -1 });
+
         return res.status(200).json(posts);
     } catch (error) {
         return res.status(500).json({ message: 'Server error' });
@@ -102,7 +120,7 @@ const editPost = async (req, res) => {
         if (!existingPost) {
             return res.status(404).json({ message: 'Post not found' });
         }
-        
+
 
         const updatedPost = await Post.findByIdAndUpdate(postId, { content }, { new: true });
         return res.status(200).json({ message: 'Post edited successfully', post: updatedPost });
@@ -135,6 +153,53 @@ const singlePost = async (req, res) => {
 
 }
 
+const likePost = async (req, res) => {
+    const { id } = req.body;
+    const user = req.user;
+    try {
+
+        const isPostAvailable = await Post.findById(id);
+        if (!isPostAvailable) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const isLiked = isPostAvailable.likes.includes(user);
+        if (isLiked) {
+            return res.status(200).json({ message: 'Post is already liked' });
+        }
+
+        isPostAvailable.likes.push(user);
+        await isPostAvailable.save();
+        return res.status(200).json({ message: 'Added like' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+
+const removeLike = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+    try {
+        const isPostAvailable = await Post.findById(id);
+        if (!isPostAvailable) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const isLiked = isPostAvailable.likes.includes(user);
+        if (!isLiked) {
+            return res.status(200).json({ message: 'Not liked by you' });
+        }
+        isPostAvailable.likes = isPostAvailable.likes.filter(userId => userId.toString() !== user.toString());
+        await isPostAvailable.save();
+
+        res.status(200).json({ message: 'Like removed successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+
+}
 
 
 
@@ -148,4 +213,4 @@ const singlePost = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts, singlePost }
+module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts, singlePost, likePost, removeLike }

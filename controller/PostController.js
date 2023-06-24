@@ -17,24 +17,24 @@ const createPost = async (req, res) => {
     }
 
     try {
-
-        let myCloud;
+        let postImage = null;
         if (file) {
             const fileUri = getDataUri(file);
-            myCloud = await cloudinary.uploader.upload(fileUri.content, {
+
+            let myCloud = await cloudinary.uploader.upload(fileUri.content, {
                 folder: 'Snapia',
             });
+
+            postImage = {
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url,
+            };
         }
 
         const newPost = new Post({
             content,
             author: user._id,
-            postImage: file
-                ? {
-                    public_id: myCloud.public_id,
-                    url: myCloud.secure_url,
-                }
-                : undefined,
+            postImage
         });
 
         const savedPost = await newPost.save();
@@ -58,6 +58,9 @@ const deletePost = async (req, res) => {
         const isPostAvailable = await Post.findById(id);
         if (!isPostAvailable) {
             return res.status(401).json({ message: 'Post not found' });
+        }
+        if (isPostAvailable.postImage && isPostAvailable.postImage.public_id) {
+            await cloudinary.uploader.destroy(isPostAvailable.postImage.public_id);
         }
         await Post.findByIdAndDelete(isPostAvailable._id)
         await BookMark.deleteOne({ post: id })
@@ -99,7 +102,7 @@ const editPost = async (req, res) => {
         if (!existingPost) {
             return res.status(404).json({ message: 'Post not found' });
         }
-
+        
 
         const updatedPost = await Post.findByIdAndUpdate(postId, { content }, { new: true });
         return res.status(200).json({ message: 'Post edited successfully', post: updatedPost });
@@ -120,6 +123,17 @@ const singleUserPosts = async (req, res) => {
     }
 
 }
+const singlePost = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const findPost = await Post.findById(id).populate('author', '-password  -updatedAt -createdAt');
+        return res.status(200).json({ post: findPost });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+
+}
 
 
 
@@ -134,4 +148,4 @@ const singleUserPosts = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts }
+module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts, singlePost }

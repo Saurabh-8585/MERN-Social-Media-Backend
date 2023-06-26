@@ -30,7 +30,6 @@ const createPost = async (req, res) => {
                 url: myCloud.secure_url,
             };
         }
-
         const newPost = new Post({
             content,
             author: user._id,
@@ -47,30 +46,35 @@ const createPost = async (req, res) => {
 
 const deletePost = async (req, res) => {
     const { id } = req.params;
-    let user = req.user;
-    const isUser = await User.findById(user);
+    const { user } = req;
 
     try {
+        const isUser = await User.exists({ _id: user });
         if (!isUser) {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        const isPostAvailable = await Post.findById(id);
-        if (!isPostAvailable) {
+        const post = await Post.findById(id);
+        if (!post) {
             return res.status(401).json({ message: 'Post not found' });
         }
-        if (isPostAvailable.postImage && isPostAvailable.postImage.public_id) {
-            await cloudinary.uploader.destroy(isPostAvailable.postImage.public_id);
+
+        if (post.postImage && post.postImage.public_id) {
+            await cloudinary.uploader.destroy(post.postImage.public_id);
         }
-        await Post.findByIdAndDelete(isPostAvailable._id)
-        await BookMark.deleteOne({ post: id })
-        return res.status(200).json({ message: 'Post Deleted successfully' });
+
+        const [deletedPost, deletedBookmark] = await Promise.all([
+            Post.findByIdAndDelete(post._id),
+            BookMark.deleteOne({ post: id }),
+        ]);
+
+        return res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Server error' });
     }
+};
 
-}
 
 const getAllPost = async (req, res) => {
     try {
@@ -144,7 +148,22 @@ const singleUserPosts = async (req, res) => {
 const singlePost = async (req, res) => {
     const { id } = req.params;
     try {
-        const findPost = await Post.findById(id).populate('author', '-password  -updatedAt -createdAt');
+        const findPost = await Post.findById(id).populate({
+            path: 'author',
+            select: '-password -updatedAt -createdAt -email'
+        })
+            .populate({
+                path: 'likes',
+                select: '-password -updatedAt -createdAt -email'
+            })
+
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user',
+                    select: '-password -updatedAt -createdAt -email'
+                }
+            });
         return res.status(200).json({ post: findPost });
     } catch (error) {
         console.error(error);

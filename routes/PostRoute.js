@@ -9,6 +9,8 @@ const {
     singlePost,
     likePost,
     removeLike,
+    addComment,
+    removeComment,
 
 }
     = require('../controller/PostController');
@@ -30,7 +32,11 @@ router.delete('/delete/:id', authMiddleware, deletePost);
 router.put('/edit/:postId', authMiddleware, editPost);
 
 router.post('/like', authMiddleware, likePost);
+
 router.delete('/dislike/:id', authMiddleware, removeLike);
 
+router.post('/comment/:id', authMiddleware, addComment);
+
+router.delete('/comment/:postID/:commentID', authMiddleware, removeComment);
 
 module.exports = router

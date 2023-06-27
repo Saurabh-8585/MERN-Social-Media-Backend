@@ -3,6 +3,7 @@ const User = require('../models/User')
 const BookMark = require('../models/BookMark');
 const cloudinary = require('../config/cloudinary');
 const getDataUri = require('../config/DataUri');
+const mongoose = require('mongoose');
 
 
 const createPost = async (req, res) => {
@@ -54,19 +55,22 @@ const deletePost = async (req, res) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        const post = await Post.findById(id);
-        if (!post) {
+        const SelectedPost = await Post.findById(id);
+        if (!SelectedPost) {
             return res.status(401).json({ message: 'Post not found' });
         }
 
-        if (post.postImage && post.postImage.public_id) {
-            await cloudinary.uploader.destroy(post.postImage.public_id);
+        if (SelectedPost.postImage && SelectedPost.postImage.public_id) {
+            await cloudinary.uploader.destroy(SelectedPost.postImage.public_id);
+        }
+        await Post.findByIdAndDelete(SelectedPost._id)
+
+
+        const isBookMarked = await BookMark.findOne({ post: id })
+        if (isBookMarked) {
+            await BookMark.deleteOne({ post: id })
         }
 
-        const [deletedPost, deletedBookmark] = await Promise.all([
-            Post.findByIdAndDelete(post._id),
-            BookMark.deleteOne({ post: id }),
-        ]);
 
         return res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
@@ -107,7 +111,6 @@ const editPost = async (req, res) => {
     const { postId } = req.params;
     const { content } = req.body;
 
-    const file = req.file;
     const user = req.user;
     try {
 
@@ -148,29 +151,30 @@ const singleUserPosts = async (req, res) => {
 const singlePost = async (req, res) => {
     const { id } = req.params;
     try {
-        const findPost = await Post.findById(id).populate({
-            path: 'author',
-            select: '-password -updatedAt -createdAt -email'
-        })
+        const findPost = await Post.findById(id)
+            .populate({
+                path: 'author',
+                select: '-password -updatedAt -createdAt -email',
+            })
             .populate({
                 path: 'likes',
-                select: '-password -updatedAt -createdAt -email'
+                select: '-password -updatedAt -createdAt -email',
             })
-
             .populate({
                 path: 'comments',
                 populate: {
                     path: 'user',
-                    select: '-password -updatedAt -createdAt -email'
-                }
+                    select: '-password -updatedAt -createdAt -email',
+                },
             });
+
         return res.status(200).json({ post: findPost });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Server error' });
     }
+};
 
-}
 
 const likePost = async (req, res) => {
     const { id } = req.body;
@@ -221,6 +225,61 @@ const removeLike = async (req, res) => {
 }
 
 
+const addComment = async (req, res) => {
+    const { id } = req.params;
+    const { content } = req.body;
+    const user = req.user;
+
+    try {
+        const isPostAvailable = await Post.findById(id);
+        if (!isPostAvailable) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const newComment = {
+            _id: new mongoose.Types.ObjectId(),
+            user,
+            text: content
+        }
+        isPostAvailable.comments.push(newComment)
+        await isPostAvailable.save();
+        return res.status(200).json({ message: 'Comment Added' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+const removeComment = async (req, res) => {
+    const { postID,  commentID } = req.params;
+    console.log({postID, commentID});
+    const user = req.user;
+    try {
+        const isPostAvailable = await Post.findById(postID);
+        if (!isPostAvailable) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const comment = isPostAvailable.comments.find(
+            (c) => c._id.toString() === commentID
+        );
+console.log(comment);
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+        isPostAvailable.comments = isPostAvailable.comments.filter(
+            (c) => c._id.toString() !== commentID
+        );
+
+        await isPostAvailable.save();
+
+
+        res.status(200).json({ message: 'Comment removed successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+
+}
 
 
 
@@ -232,4 +291,17 @@ const removeLike = async (req, res) => {
 
 
 
-module.exports = { createPost, deletePost, getAllPost, editPost, singleUserPosts, singlePost, likePost, removeLike }
+
+
+module.exports = {
+    createPost,
+    deletePost,
+    getAllPost,
+    editPost,
+    singleUserPosts,
+    singlePost,
+    likePost,
+    removeLike,
+    addComment,
+    removeComment,
+}

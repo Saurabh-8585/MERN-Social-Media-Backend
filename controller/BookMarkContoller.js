@@ -19,8 +19,8 @@ const addToBookMark = async (req, res) => {
     const user = req.user;
     const { id } = req.params;
     try {
-        const isBookMarked = await BookMark.findOne({ post: id });
-        if (isBookMarked) {
+        const isBookMarked = await BookMark.find({ $and: [{ post: id }, { user }] });
+        if (isBookMarked.length > 0) {
             return res.status(401).json({ message: 'Already bookmarked' });
         }
         else {

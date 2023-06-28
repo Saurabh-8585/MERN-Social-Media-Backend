@@ -163,7 +163,7 @@ const singlePost = async (req, res) => {
             .populate({
                 path: 'comments',
                 populate: {
-                    path: 'user',
+                    path: 'user commentLikes',
                     select: '-password -updatedAt -createdAt -email',
                 },
             });
@@ -250,23 +250,29 @@ const addComment = async (req, res) => {
     }
 }
 const removeComment = async (req, res) => {
-    const { postID,  commentID } = req.params;
-    console.log({postID, commentID});
+    const { PostID, commentId } = req.params;
     const user = req.user;
     try {
-        const isPostAvailable = await Post.findById(postID);
+        const isPostAvailable = await Post.findById(PostID);
         if (!isPostAvailable) {
             return res.status(404).json({ message: 'Post not found' });
         }
         const comment = isPostAvailable.comments.find(
-            (c) => c._id.toString() === commentID
+            (c) => c._id.toString() === commentId
         );
-console.log(comment);
+        const isAuthor = isPostAvailable.comments.find(
+            (c) => c.user.toString() === user
+        );
+
+        if (!isAuthor) {
+            return res.status(404).json({ message: 'Not authorized user' });
+        }
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
+
         isPostAvailable.comments = isPostAvailable.comments.filter(
-            (c) => c._id.toString() !== commentID
+            (c) => c._id.toString() !== commentId
         );
 
         await isPostAvailable.save();
@@ -281,7 +287,39 @@ console.log(comment);
 
 }
 
+const likeComment = async (req, res) => {
+    const { postId, commentId } = req.body;
+    const user = req.user;
+    try {
+        const isPostAvailable = await Post.findById(postId);
 
+        if (!isPostAvailable) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+        const comment = isPostAvailable.comments.find((c) => c._id.toString() === commentId);
+
+        const isAuthor = isPostAvailable.comments.find((c) => c.user.toString() === user);
+
+        if (!isAuthor) {
+            return res.status(404).json({ message: 'Not authorized user' });
+        }
+        if (!comment) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+        if (comment.commentLikes.includes(user)) {
+            return res.status(404).json({ message: 'Already liked comment' });
+        }
+        comment.commentLikes.push(user)
+        await isPostAvailable.save();
+
+
+        res.status(200).json({ message: 'Comment liked successfully' });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 
 
 
@@ -304,4 +342,5 @@ module.exports = {
     removeLike,
     addComment,
     removeComment,
+    likeComment,
 }

@@ -11,6 +11,7 @@ const {
     removeLike,
     addComment,
     removeComment,
+    likeComment,
 
 }
     = require('../controller/PostController');
@@ -18,11 +19,11 @@ const upload = require('../config/multer');
 
 
 const router = express.Router();
-// all post
+
 router.get('/posts', getAllPost);
-//single user all post
+
 router.get('/user/:id', singleUserPosts);
-// single post
+
 router.get('/post/:id', singlePost);
 
 router.post('/new', upload, authMiddleware, createPost);
@@ -37,6 +38,8 @@ router.delete('/dislike/:id', authMiddleware, removeLike);
 
 router.post('/comment/:id', authMiddleware, addComment);
 
-router.delete('/comment/:postID/:commentID', authMiddleware, removeComment);
+router.delete('/comment/delete/:PostID/:commentId', authMiddleware, removeComment);
+
+router.post('/like/comment', authMiddleware, likeComment);
 
 module.exports = router

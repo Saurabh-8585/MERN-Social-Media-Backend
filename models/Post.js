@@ -11,10 +11,19 @@ const commentSchema = new mongoose.Schema(
         text: {
             type: String,
             required: true
-        }
+        },
+        commentLikes: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+                unique: true
+            }
+        ]
     },
     { timestamps: true }
 );
+
+
 const postSchema = new mongoose.Schema({
     content: {
         type: String,
@@ -36,7 +45,8 @@ const postSchema = new mongoose.Schema({
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'User',
+            unique: true
         }
     ],
     comments: [commentSchema]

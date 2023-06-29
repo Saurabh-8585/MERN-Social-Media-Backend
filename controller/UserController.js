@@ -1,3 +1,4 @@
+const Post = require('../models/Post');
 const User = require('../models/User');
 // const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
@@ -39,7 +40,7 @@ const getUserData = async (req, res) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        const userData = await User.findById(id)
+        const userInfo = await User.findById(id)
             .populate({
                 path: 'followers',
                 select: '-password -updatedAt -createdAt -email',
@@ -48,7 +49,25 @@ const getUserData = async (req, res) => {
                 path: 'following',
                 select: '-password -updatedAt -createdAt -email',
             })
-            .select('-password -createdAt -email');
+            .select('-password -updatedAt -email');
+
+        const posts = await Post.find({ author: id })
+            .populate({
+                path: 'author',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .populate({
+                path: 'likes',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user commentLikes',
+                    select: '-password -updatedAt -createdAt -email',
+                },
+            });
+        const userData = { userInfo, posts }
 
         return res.status(200).json(userData);
     } catch (error) {

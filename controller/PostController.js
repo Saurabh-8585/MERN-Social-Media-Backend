@@ -140,7 +140,22 @@ const editPost = async (req, res) => {
 const singleUserPosts = async (req, res) => {
     const { id } = req.params;
     try {
-        const findUserPosts = await Post.find({ author: id });
+        const findUserPosts = await Post.find({ author: id })
+            .populate({
+                path: 'author',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .populate({
+                path: 'likes',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .populate({
+                path: 'comments',
+                populate: {
+                    path: 'user commentLikes',
+                    select: '-password -updatedAt -createdAt -email',
+                },
+            });;
         return res.status(200).json({ post: findUserPosts });
     } catch (error) {
         console.error(error);

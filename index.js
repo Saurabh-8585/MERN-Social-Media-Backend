@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(checkOrigin);
+// app.use(checkOrigin);
 
 app.use('/api/auth', auth);
 app.use('/api/user', user);

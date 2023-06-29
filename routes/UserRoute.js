@@ -13,6 +13,6 @@ const router = express.Router();
 
 // router.put('/follow/:id', authMiddleware, followUser);
 
-router.get('/profile/:id', getUserData);
+router.get('/:id', getUserData);
 
 module.exports = router

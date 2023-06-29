@@ -23,15 +23,16 @@ const addToBookMark = async (req, res) => {
         if (isBookMarked.length > 0) {
             return res.status(401).json({ message: 'Already bookmarked' });
         }
-        else {
-            const newBookMark = new BookMark({
-                user,
-                post: id,
-            })
-            await newBookMark.save()
-            return res.status(201).json({ message: "Added to bookmark" })
-        }
+
+        const newBookMark = new BookMark({
+            user,
+            post: id,
+        })
+        await newBookMark.save()
+        return res.status(201).json({ message: "Added to bookmark" })
+
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: 'Server error' });
     }
 
@@ -42,6 +43,7 @@ const removeBookMark = async (req, res) => {
 
     try {
         const isBookMarkAvailable = await BookMark.findById(id)
+        console.log(isBookMarkAvailable);
         if (isBookMarkAvailable) {
             const deleteBookMark = await BookMark.findByIdAndDelete(isBookMarkAvailable)
             if (deleteBookMark) {

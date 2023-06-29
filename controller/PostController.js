@@ -41,6 +41,7 @@ const createPost = async (req, res) => {
 
         return res.status(200).json({ message: 'Posted successfully' });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -66,11 +67,10 @@ const deletePost = async (req, res) => {
         await Post.findByIdAndDelete(SelectedPost._id)
 
 
-        const isBookMarked = await BookMark.findOne({ post: id })
-        if (isBookMarked) {
-            await BookMark.deleteOne({ post: id })
-        }
-
+        await Promise.all([
+            Post.findByIdAndDelete(SelectedPost._id),
+            BookMark.deleteOne({ post: id }),
+        ]);
 
         return res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
@@ -95,7 +95,7 @@ const getAllPost = async (req, res) => {
             .populate({
                 path: 'comments',
                 populate: {
-                    path: 'user',
+                    path: 'user commentLikes',
                     select: '-password -updatedAt -createdAt -email'
                 }
             })

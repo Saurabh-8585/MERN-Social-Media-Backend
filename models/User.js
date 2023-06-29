@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    
     userImage: {
         public_id: {
             type: String,
@@ -22,6 +23,22 @@ const userSchema = new mongoose.Schema({
             type: String,
         }
     },
+
+    followers: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            unique: true
+        }
+    ],
+
+    following: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            unique: true
+        }
+    ],
 
 }, { timestamps: true });
 

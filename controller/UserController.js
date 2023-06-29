@@ -3,6 +3,60 @@ const User = require('../models/User');
 // const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 
+
+
+const followUser = async (req, res) => {
+    const { id } = req.params;
+    const user = req.user;
+
+    try {
+        const reqUser = await User.findById(id);
+
+        if (!reqUser) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const isFollowed = reqUser.followers.includes(id)
+
+        if (isFollowed) {
+            return res.status(401).json({ message: 'Already following' });
+        }
+        user.follow.push(id)
+
+        await user.save()
+
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+
+const getUserData = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const isUser = await User.findById(id);
+        if (!isUser) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const userData = await User.findById(id)
+            .populate({
+                path: 'followers',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .populate({
+                path: 'following',
+                select: '-password -updatedAt -createdAt -email',
+            })
+            .select('-password -createdAt -email');
+
+        return res.status(200).json(userData);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
 const checkCurrentUser = async (req, res) => {
     let user = req.user;
     try {
@@ -14,12 +68,12 @@ const checkCurrentUser = async (req, res) => {
             return res.status(200).json({ id: isUser._id });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 }
 const deleteUser = async (req, res) => {
     let user = req.user;
-    
+
     try {
         const isUser = await User.findById(user);
 
@@ -34,4 +88,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { checkCurrentUser, deleteUser }
+module.exports = { checkCurrentUser, deleteUser, followUser, getUserData }

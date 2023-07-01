@@ -43,7 +43,6 @@ const removeBookMark = async (req, res) => {
 
     try {
         const isBookMarkAvailable = await BookMark.findById(id)
-        console.log(isBookMarkAvailable);
         if (isBookMarkAvailable) {
             const deleteBookMark = await BookMark.findByIdAndDelete(isBookMarkAvailable)
             if (deleteBookMark) {

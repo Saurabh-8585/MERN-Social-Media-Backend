@@ -1,5 +1,7 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
+const cloudinary = require('../config/cloudinary');
+const getDataUri = require('../config/DataUri');
 // const bcrypt = require('bcrypt');
 // const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
@@ -25,7 +27,7 @@ const getUserData = async (req, res) => {
                 path: 'following',
                 select: '_id username',
             })
-            .select('-password -updatedAt -email');
+            .select('-password -updatedAt');
 
         const userData = { userInfo }
 
@@ -35,6 +37,11 @@ const getUserData = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+
+
+
 const followUser = async (req, res) => {
     const { id } = req.params;
     const userId = req.user;
@@ -58,9 +65,6 @@ const followUser = async (req, res) => {
         userToFollow.followers.push(requestingUser._id);
         await requestingUser.save();
         await userToFollow.save();
-
-        // console.log('Who requested:', requestingUser.username);
-        // console.log('Requested user wants to follow this user:', userToFollow.username);
 
         return res.status(200).json({ message: 'Followed Successfully' });
     } catch (error) {
@@ -92,11 +96,6 @@ const unFollowUser = async (req, res) => {
         userToFollow.followers = userToFollow.followers.filter((user) => user._id.toString() !== userId);
         await requestingUser.save();
         await userToFollow.save()
-
-        console.log('Who requested:', requestingUser.username);
-        console.log({ isFollowing });
-        console.log('Requested user wants to unfollow this user:', userToFollow.username);
-        console.log({ isFollower });
         return res.status(200).json({ message: 'Unfollowed Successfully' });
 
     } catch (error) {
@@ -137,4 +136,43 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { checkCurrentUser, deleteUser, followUser, getUserData, unFollowUser }
+const updateUserProfile = async (req, res) => {
+    const { id } = req.params;
+    const { email, username, about, image } = req.body;
+    const file = req.file;
+
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        if (file) {
+            const fileUri = getDataUri(file);
+
+            const myCloud = await cloudinary.uploader.upload(fileUri.content, {
+                folder: 'Snapia',
+            });
+
+            const userImage = {
+                public_id: myCloud.public_id,
+                url: myCloud.secure_url,
+            };
+
+            user.userImage = userImage;
+        }
+
+        user.email = email;
+        user.username = username;
+        user.about = about;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { checkCurrentUser, deleteUser, followUser, getUserData, unFollowUser, updateUserProfile }

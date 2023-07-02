@@ -138,34 +138,45 @@ const deleteUser = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
     const { id } = req.params;
-    const { email, username, about, image } = req.body;
+    const { email, username, about, selectedFile, imageId, image } = req.body;
     const file = req.file;
 
     try {
         const user = await User.findById(id);
+
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        if (file) {
+        if (!file) {
+            if (user.userImage.public_id) {
+                await cloudinary.uploader.destroy(user.userImage.public_id);
+                user.userImage = null;
+            }
+        }
+        
+        
+        if (file && image) {
+            if (user.userImage.public_id) {
+                await cloudinary.uploader.destroy(user.userImage.public_id);
+            }
             const fileUri = getDataUri(file);
-
             const myCloud = await cloudinary.uploader.upload(fileUri.content, {
                 folder: 'Snapia',
             });
-
             const userImage = {
                 public_id: myCloud.public_id,
                 url: myCloud.secure_url,
             };
-
+            
             user.userImage = userImage;
         }
-
+        
         user.email = email;
         user.username = username;
         user.about = about;
-
+        
+        
         await user.save();
 
         res.status(200).json({ message: 'Profile updated successfully' });

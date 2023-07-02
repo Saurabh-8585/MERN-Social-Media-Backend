@@ -55,11 +55,26 @@ const SignIn = async (req, res) => {
         res.status(200).json({ message: `Welcome Back ${user.username}`, token });
     } catch (error) {
 
-        res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
+const resetPassword = async (req, res) => {
+    const { id } = req.params;
+    const { oldPassword, newPassword } = req.body;
+
+    try {
+        const user = await User.findById(id)
+        const comparePassword = await bcrypt.compare(oldPassword, user.password)
+
+        console.log({comparePassword});
+
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 
 
 
-module.exports = { SignIn, SignUp }
+module.exports = { SignIn, SignUp, resetPassword }

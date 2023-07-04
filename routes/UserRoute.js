@@ -3,10 +3,10 @@ const upload = require('../config/multer');
 const authMiddleware = require('../middleware/AuthMiddleware');
 const { deleteUser,
     followUser,
-    getUserData,
+    getSingleUserData,
     unFollowUser,
     updateUserProfile,  
-    getAllUsers
+    getAllUsersData
 } = require('../controller/UserController');
 
 
@@ -14,13 +14,11 @@ const { deleteUser,
 
 const router = express.Router();
 
-// router.get('/currentuser', authMiddleware, checkCurrentUser);
 
 
 
-router.get('/:id', getUserData);
+router.get('/:id', getSingleUserData);
 
-router.get('/users', getAllUsers);
 
 router.put('/follow/:id', authMiddleware, followUser);
 
@@ -29,5 +27,7 @@ router.delete('/unfollow/:id', authMiddleware, unFollowUser);
 router.put('/update/:id', authMiddleware, upload, updateUserProfile)
 
 router.delete('/deleteuser', authMiddleware, deleteUser);
+
+router.get('/all/users', getAllUsersData);
 
 module.exports = router

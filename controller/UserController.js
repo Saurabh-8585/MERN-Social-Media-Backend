@@ -9,18 +9,35 @@ const dotenv = require('dotenv').config();
 
 
 
-const getAllUsers = async (req, res) => {
+const getAllUsersData = async (req, res) => {
     try {
-        const users = await User.find({});
-        // console.log(users);
-        return res.status(200).json(users);
+        const users = await User.find()
+            .populate({
+                path: 'followers',
+                select: '_id username',
+            })
+            .populate({
+                path: 'following',
+                select: '_id username',
+            })
+            .select('-password -updatedAt -email -createdAt');;
+
+
+        const usersWithPostCount = await Promise.all(
+            users.map(async (user) => {
+                const postCount = await Post.find({ author: user._id }).countDocuments();
+                return { ...user.toObject(), postCount };
+            })
+        );
+
+        return res.status(200).json(usersWithPostCount);
     } catch (error) {
-        // console.log(error);
         return res.status(500).json({ message: 'Server error' });
     }
 };
 
-const getUserData = async (req, res) => {
+
+const getSingleUserData = async (req, res) => {
     const { id } = req.params;
     try {
         const isUser = await User.findById(id);
@@ -47,10 +64,6 @@ const getUserData = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 };
-
-
-
-
 
 const followUser = async (req, res) => {
     const { id } = req.params;
@@ -227,4 +240,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { checkCurrentUser, getAllUsers,followUser, getUserData, unFollowUser, updateUserProfile, deleteUser }
+module.exports = { checkCurrentUser, getAllUsersData, followUser, getSingleUserData, unFollowUser, updateUserProfile, deleteUser }

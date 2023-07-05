@@ -9,14 +9,7 @@ const mongoose = require('mongoose');
 const createPost = async (req, res) => {
     const { content } = req.body;
     const file = req.file;
-
-
     const user = await User.findById(req.user);
-
-    if (!user) {
-        return res.status(401).json({ message: 'User not found' });
-    }
-
     try {
         let postImage = null;
         if (file) {
@@ -51,14 +44,18 @@ const deletePost = async (req, res) => {
     const { user } = req;
 
     try {
-        const isUser = await User.exists({ _id: user });
-        if (!isUser) {
-            return res.status(401).json({ message: 'User not found' });
-        }
+        // const isUser = await User.exists({ _id: user });
+        // if (!isUser) {
+        //     return res.status(401).json({ message: 'User not found' });
+        // }
 
         const SelectedPost = await Post.findById(id);
         if (!SelectedPost) {
             return res.status(401).json({ message: 'Post not found' });
+        }
+
+        if (SelectedPost.author.toString() !== user) {
+            return res.status(401).json({ message: 'Not authorized person to delete post' });
         }
 
         if (SelectedPost.postImage && SelectedPost.postImage.public_id) {
@@ -69,7 +66,7 @@ const deletePost = async (req, res) => {
 
         await Promise.all([
             Post.findByIdAndDelete(SelectedPost._id),
-            BookMark.deleteOne({ post: id }),
+            BookMark.deleteMany({ post: id }),
         ]);
 
         return res.status(200).json({ message: 'Post deleted successfully' });
@@ -117,9 +114,6 @@ const editPost = async (req, res) => {
         const existingUser = await User.findById(user);
         const existingPost = await Post.findById(postId);
 
-        if (!existingUser) {
-            return res.status(401).json({ message: 'User not found' });
-        }
         if (existingUser._id.toString() !== existingPost.author.toString()) {
             return res.status(401).json({ message: 'Unauthorized user' });
         }
@@ -275,15 +269,15 @@ const removeComment = async (req, res) => {
         const comment = isPostAvailable.comments.find(
             (c) => c._id.toString() === commentId
         );
-        const isAuthor = isPostAvailable.comments.find(
-            (c) => c.user.toString() === user
-        );
-
-        if (!isAuthor) {
-            return res.status(404).json({ message: 'Not authorized user' });
-        }
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        const isAuthorizedPerson = isPostAvailable.author == user
+            || isPostAvailable.comments.find((c) => c.user.toString() === user);
+
+        if (!isAuthorizedPerson) {
+            return res.status(404).json({ message: 'Not authorized user' });
         }
 
         isPostAvailable.comments = isPostAvailable.comments.filter(
@@ -302,39 +296,7 @@ const removeComment = async (req, res) => {
 
 }
 
-const likeComment = async (req, res) => {
-    const { postId, commentId } = req.body;
-    const user = req.user;
-    try {
-        const isPostAvailable = await Post.findById(postId);
 
-        if (!isPostAvailable) {
-            return res.status(404).json({ message: 'Post not found' });
-        }
-        const comment = isPostAvailable.comments.find((c) => c._id.toString() === commentId);
-
-        const isAuthor = isPostAvailable.comments.find((c) => c.user.toString() === user);
-
-        if (!isAuthor) {
-            return res.status(404).json({ message: 'Not authorized user' });
-        }
-        if (!comment) {
-            return res.status(404).json({ message: 'Comment not found' });
-        }
-        if (comment.commentLikes.includes(user)) {
-            return res.status(404).json({ message: 'Already liked comment' });
-        }
-        comment.commentLikes.push(user)
-        await isPostAvailable.save();
-
-
-        res.status(200).json({ message: 'Comment liked successfully' });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
-    }
-}
 
 
 
@@ -357,5 +319,5 @@ module.exports = {
     removeLike,
     addComment,
     removeComment,
-    likeComment,
+
 }

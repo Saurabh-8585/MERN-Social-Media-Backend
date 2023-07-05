@@ -11,8 +11,7 @@ const {
     removeLike,
     addComment,
     removeComment,
-    likeComment,
-
+    
 }
     = require('../controller/PostController');
 const upload = require('../config/multer');
@@ -40,6 +39,5 @@ router.post('/comment/:id', authMiddleware, addComment);
 
 router.delete('/comment/delete/:PostID/:commentId', authMiddleware, removeComment);
 
-router.post('/like/comment', authMiddleware, likeComment);
 
 module.exports = router

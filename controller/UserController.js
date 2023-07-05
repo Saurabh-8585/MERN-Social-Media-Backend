@@ -209,33 +209,42 @@ const deleteUser = async (req, res) => {
             await cloudinary.uploader.destroy(findUser.userImage.public_id);
         }
 
-        await User.updateMany(
-            { 'followers': userId },
-            { $pull: { 'followers': userId } }
+
+        await BookMark.deleteMany({
+            $or: [
+                { 'post': { $in: await Post.find({ author: userId }).distinct('_id') } },
+                { 'user': userId }
+            ]
+        });
+
+        await Post.updateMany(
+            { 'comments.user': userId },
+            { $pull: { 'comments': { 'user': userId } } }
         );
-        await User.updateMany(
-            { 'following': userId },
-            { $pull: { 'following': { $in: [userId] } } }
-        );
-        await User.findByIdAndDelete(userId);
 
         await Post.deleteMany({ author: userId, })
+
         await Post.updateMany(
             { 'likes': userId },
             { $pull: { 'likes': userId } }
         );
 
-        await Comment.deleteMany({ user: userId })
-        await Comment.updateMany(
-            { 'commentLikes': userId },
-            { $pull: { 'commentLikes': userId } }
+        await User.updateMany(
+            { 'followers': userId },
+            { $pull: { 'followers': userId } }
         );
 
-        await BookMark.deleteMany({ user: userId })
+        await User.updateMany(
+            { 'following': userId },
+            { $pull: { 'following': { $in: [userId] } } }
+        );
+
+        await User.findByIdAndDelete(userId);
 
         return res.status(200).json({ message: 'Account deleted successfully' });
 
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Server error' });
     }
 };

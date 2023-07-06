@@ -146,7 +146,7 @@ const checkCurrentUser = async (req, res) => {
 
 const updateUserProfile = async (req, res) => {
     const { id } = req.params;
-    const { email, username, about, selectedFile, imageId, image } = req.body;
+    const { email, username, about, location, image, website } = req.body;
     const file = req.file;
 
     try {
@@ -183,7 +183,8 @@ const updateUserProfile = async (req, res) => {
         user.email = email;
         user.username = username;
         user.about = about;
-
+        user.location = location
+        user.website = website
 
         await user.save();
 

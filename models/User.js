@@ -25,7 +25,12 @@ const userSchema = new mongoose.Schema({
             type: String,
         }
     },
-
+    location: {
+        type: String,
+    },
+    website: {
+        type: String
+    },
     followers: [
         {
             type: mongoose.Schema.Types.ObjectId,

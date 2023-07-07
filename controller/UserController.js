@@ -1,7 +1,6 @@
 const Post = require('../models/Post');
 const User = require('../models/User');
 const BookMark = require('../models/BookMark');
-const Comment = require('../models/Comment');
 const cloudinary = require('../config/cloudinary');
 const getDataUri = require('../config/DataUri');
 

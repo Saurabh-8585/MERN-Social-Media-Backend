@@ -11,6 +11,7 @@ const {
     removeLike,
     addComment,
     removeComment,
+    editComment,
     
 }
     = require('../controller/PostController');
@@ -38,6 +39,8 @@ router.delete('/dislike/:id', authMiddleware, removeLike);
 router.post('/comment/:id', authMiddleware, addComment);
 
 router.delete('/comment/delete/:PostID/:commentId', authMiddleware, removeComment);
+
+router.put('/comment/edit/:PostID/:commentId', authMiddleware, editComment);
 
 
 module.exports = router

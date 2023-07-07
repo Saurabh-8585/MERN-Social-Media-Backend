@@ -1,9 +1,9 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const Post = require('../models/Post');
-const BookMark = require('../models/BookMark');
 const dotenv = require('dotenv').config();
+const nodemailer = require('nodemailer');
+const SendEmailTemplate = require('../template/SendEmailLink')
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -87,5 +87,53 @@ const resetPassword = async (req, res) => {
 }
 
 
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+        const secretKey = user._id + process.env.JWT_SECRET;
+        const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
+        const link = `${process.env.FORGOT_PASSWORD}/${user._id}/${token}`;
+        const emailContent =await SendEmailTemplate(link)
+        console.log({
+            secretKey,
+            token,
+            link,
+            emailContent,
+        });
+        const transport = nodemailer.createTransport({
+            service: "gmail",
+            host: "smtp.gmail.email",
+            secure: true,
+            port: 465,
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASSWORD
+            },
+        })
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Password Reset Request",
+            html: emailContent
+        }
 
-module.exports = { SignIn, SignUp, resetPassword,  }
+        transport.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return res.send({ message: error });
+            } else {
+                return res.send({ message: 'Email Sent. Please Check Your Email' });
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+module.exports = { SignIn, SignUp, resetPassword, forgotPassword }

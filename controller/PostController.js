@@ -279,7 +279,6 @@ const removeComment = async (req, res) => {
         if (!isAuthorizedPerson) {
             return res.status(404).json({ message: 'Not authorized user' });
         }
-
         isPostAvailable.comments = isPostAvailable.comments.filter(
             (c) => c._id.toString() !== commentId
         );
@@ -296,6 +295,32 @@ const removeComment = async (req, res) => {
 
 }
 
+const editComment = async (req, res) => {
+    const userId = req.user;
+    const { PostID, commentId } = req.params;
+    const { content } = req.body;
+    try {
+        const post = await Post.findById(PostID);
+
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        const comment = post.comments.id(commentId);
+
+        if (!comment || comment.user.toString() !== userId) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+
+        comment.text = content;
+        await post.save();
+
+        return res.json({ message: 'Comment updated successfully' });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
 
 
 
@@ -319,5 +344,6 @@ module.exports = {
     removeLike,
     addComment,
     removeComment,
+    editComment
 
 }

@@ -6,6 +6,8 @@ const auth = require('./routes/AuthRoute');
 const post = require('./routes/PostRoute');
 const user = require('./routes/UserRoute');
 const bookMark = require('./routes/BookMarkRoute');
+const message = require('./routes/MessageRoute');
+const conversation = require('./routes/ConversationRoute');
 const checkOrigin = require('./middleware/ApiAuth');
 const passport = require('passport');
 const cookieSession = require('cookie-session')
@@ -35,6 +37,9 @@ app.use('/api/auth', auth);
 app.use('/api/user', user);
 app.use('/api/post', post);
 app.use('/api/bookmark', bookMark);
+app.use('/api/conversation', conversation);
+app.use('/api/message', message);
+
 
 app.listen(port, () => {
   console.log(`E-commerce backend listening at http://localhost:${port}`);

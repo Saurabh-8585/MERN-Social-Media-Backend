@@ -47,11 +47,11 @@ const getSingleUserData = async (req, res) => {
         const userInfo = await User.findById(id)
             .populate({
                 path: 'followers',
-                select: '_id username',
+                select: '_id username userImage',
             })
             .populate({
                 path: 'following',
-                select: '_id username',
+                select: '_id username userImage',
             })
             .select('-password -updatedAt');
 

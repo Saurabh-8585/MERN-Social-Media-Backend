@@ -1,7 +1,7 @@
 const dotenv = require('dotenv').config();
 
 function checkOrigin(req, res, next) {
-    const allowedOrigins = [process.env.FRONTEND_URL_1, process.env.FRONTEND_URL_2];
+    const allowedOrigins = [process.env.FRONTEND_URL];
 
     const origin = req.headers.origin;
 

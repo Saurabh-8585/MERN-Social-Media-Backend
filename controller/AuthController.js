@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 const nodemailer = require('nodemailer');
 const Mailgen = require('mailgen');
-// const SendEmailTemplate = require('../template/SendEmailLink')
+const { messageInfo, config } = require('../Mail/MailUtils');
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -78,9 +78,34 @@ const resetPassword = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        const updatePassword = await User.findByIdAndUpdate(user, { $set: { password: hashedPassword } })
+        await User.findByIdAndUpdate(user, { $set: { password: hashedPassword } })
+        let transporter = nodemailer.createTransport(config);
+        let MailGenerator = new Mailgen({
+            theme: {
+                customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
+            },
+            product: {
+                name: "Snapia",
+                link: process.env.FRONTEND_URL
+            }
+        })
+        const response = {
+            body: {
+                name: user.username,
+                intro: 'Password Reset Successful',
+                content: 'Your password has been successfully reset. You can now log in using your new password.',
+                outro: 'If you did not request a password reset, please contact our support team immediately.',
+                signature: 'Best regards,\nSnapia', // Add your custom email signature here
+            },
 
-        res.status(200).json({ message: 'Password update successfully ' });
+
+        };
+        let mail = MailGenerator.generate(response)
+        let mailMessage = messageInfo(user.email, 'Password Reset Successful', mail)
+        transporter.sendMail(mailMessage)
+            .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }))
+
+        return res.status(200).json({ message: 'Password update successfully ' });
 
     } catch (error) {
         return res.status(500).json({ message: 'Server error' });
@@ -92,58 +117,48 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
         const user = await User.findOne({ email });
-        
-        let config = {
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD
-            }
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
         }
+        const secretKey = user._id + process.env.JWT_SECRET;
+        const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
+        const link = `${process.env.FRONTEND_URL}/reset-password/${user._id}/${token}`;
 
         let transporter = nodemailer.createTransport(config);
-
         let MailGenerator = new Mailgen({
-            theme: "default",
+            theme: {
+                customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
+            },
             product: {
-                name: "Mailgen",
-                link: 'https://mailgen.js/'
+                name: "Snapia",
+                link: process.env.FRONTEND_URL
             }
         })
 
-        let response = {
+        const response = {
             body: {
-                name: "Daily Tuition",
-                intro: "Your bill has arrived!",
-                table: {
-                    data: [
-                        {
-                            item: "Nodemailer Stack Book",
-                            description: "A Backend application",
-                            price: "$10.99",
-                        }
-                    ]
+                name: user.username,
+                intro: 'Forgot Password Request',
+                action: {
+                    instructions: 'You are receiving this email because you requested a password reset. To reset your password, click the button below:',
+                    button: {
+                        color: '#A855F7',
+                        text: 'Reset Your Password',
+                        link
+                    },
                 },
-                outro: "Looking forward to do more business"
-            }
-        }
+                outro: 'If you did not request a password reset, please ignore this email.',
+                signature: 'Best regards,\nSnapia Team',
+            },
+        };
 
         let mail = MailGenerator.generate(response)
 
-        let message = {
-            from: process.env.EMAIL,
-            to: email,
-            subject: "Place Order",
-            html: mail
-        }
+        let mailMessage = messageInfo(user.email, 'Forgot Password Request', mail)
 
-        transporter.sendMail(message).then(() => {
-            return res.status(201).json({
-                msg: "you should receive an email"
-            })
-        }).catch(error => {
-            return res.status(500).json({ error })
-        })
+        transporter.sendMail(mailMessage)
+            .then(() => res.status(201).json({ message: 'An email has been sent. Please check your inbox.' }))
+            .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }));
 
 
     } catch (error) {
@@ -152,5 +167,60 @@ const forgotPassword = async (req, res) => {
     }
 }
 
+const addNewPassword = async (req, res) => {
+    const { id, token } = req.params;
+    const { newPassword } = req.body;
+    try {
+        const user = await User.findById(id)
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const secretKey = user._id + process.env.JWT_SECRET
+        try {
+            const isValid = jwt.verify(token, secretKey);
+            if (isValid) {
+                const hashPassword = await bcrypt.hash(newPassword, 10);
+                await User.findByIdAndUpdate(user._id, { $set: { password: hashPassword } });
+                let transporter = nodemailer.createTransport(config);
 
-module.exports = { SignIn, SignUp, resetPassword, forgotPassword }
+                let MailGenerator = new Mailgen({
+                    theme: {
+                        customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
+                    },
+                    product: {
+                        name: "Snapia",
+                        link: process.env.FRONTEND_URL
+                    }
+                })
+                const response = {
+                    body: {
+                        name: user.username,
+                        intro: 'Password Reset Successful',
+                        content: 'Your password has been successfully reset. You can now log in using your new password.',
+                        outro: 'If you did not request a password reset, please contact our support team immediately.',
+                        signature: 'Best regards,\nSnapia',
+                    },
+
+
+                };
+                let mail = MailGenerator.generate(response)
+                let mailMessage = messageInfo(user.email, 'Password Reset Successful', mail)
+                transporter.sendMail(mailMessage)
+                    .then(() => res.status(200).json({ message:'Password updated successfully'}))
+                    .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }))
+            }
+        } catch (err) {
+            if (err instanceof jwt.TokenExpiredError) {
+                return res.status(400).json({ message: 'Link has been expired' });
+            }
+            throw err;
+        }
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
+
+
+module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword }

@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const dotenv = require('dotenv').config();
-const { SignUp, SignIn, resetPassword, forgotPassword } = require('../controller/AuthController');
+const { SignUp, SignIn, resetPassword, forgotPassword, addNewPassword } = require('../controller/AuthController');
 const authMiddleware = require('../middleware/AuthMiddleware');
 
 
@@ -10,7 +10,8 @@ const router = express.Router();
 router.post('/signup', SignUp);
 router.post('/signin', SignIn);
 router.put('/reset', authMiddleware, resetPassword)
-router.post('/forgot-password', forgotPassword)
+router.post('/forgot/password', forgotPassword)
+router.put('/new/password/:id/:token', addNewPassword)
 
 
 // login with google

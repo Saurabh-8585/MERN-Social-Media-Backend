@@ -3,7 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
 const nodemailer = require('nodemailer');
-const SendEmailTemplate = require('../template/SendEmailLink')
+const Mailgen = require('mailgen');
+// const SendEmailTemplate = require('../template/SendEmailLink')
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -91,43 +92,59 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ message: 'User not found' });
-        }
-        const secretKey = user._id + process.env.JWT_SECRET;
-        const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
-        const link = `${process.env.FORGOT_PASSWORD}/${user._id}/${token}`;
-        const emailContent =await SendEmailTemplate(link)
-        console.log({
-            secretKey,
-            token,
-            link,
-            emailContent,
-        });
-        const transport = nodemailer.createTransport({
-            service: "gmail",
-            host: "smtp.gmail.email",
-            secure: true,
-            port: 465,
+        
+        let config = {
+            service: 'gmail',
             auth: {
                 user: process.env.EMAIL,
                 pass: process.env.EMAIL_PASSWORD
-            },
-        })
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: email,
-            subject: "Password Reset Request",
-            html: emailContent
+            }
         }
 
-        transport.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return res.send({ message: error });
-            } else {
-                return res.send({ message: 'Email Sent. Please Check Your Email' });
+        let transporter = nodemailer.createTransport(config);
+
+        let MailGenerator = new Mailgen({
+            theme: "default",
+            product: {
+                name: "Mailgen",
+                link: 'https://mailgen.js/'
             }
-        });
+        })
+
+        let response = {
+            body: {
+                name: "Daily Tuition",
+                intro: "Your bill has arrived!",
+                table: {
+                    data: [
+                        {
+                            item: "Nodemailer Stack Book",
+                            description: "A Backend application",
+                            price: "$10.99",
+                        }
+                    ]
+                },
+                outro: "Looking forward to do more business"
+            }
+        }
+
+        let mail = MailGenerator.generate(response)
+
+        let message = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Place Order",
+            html: mail
+        }
+
+        transporter.sendMail(message).then(() => {
+            return res.status(201).json({
+                msg: "you should receive an email"
+            })
+        }).catch(error => {
+            return res.status(500).json({ error })
+        })
+
 
     } catch (error) {
         console.log(error);

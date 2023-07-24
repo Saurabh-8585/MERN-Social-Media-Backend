@@ -1,6 +1,4 @@
-// conversations.js
 const express = require('express');
-const authMiddleware = require('../middleware/AuthMiddleware');
 const Conversations = require('../models/Conversation');
 const router = express.Router();
 
@@ -23,20 +21,24 @@ router.post('/', async (req, res) => {
         res.status(200).json(savedConversation);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
-router.get('/:userId', async (req, res) => {
-    const { userId } = req.params;
+router.get('/:currentUser/:id', async (req, res) => {
+    const { currentUser, id } = req.params;
     try {
         const conversation = await Conversations.find({
-            members: { $in: [userId] }
+            members: { $all: [currentUser, id] }
         });
+
+        if (!conversation || conversation.length === 0) {
+            return res.status(404).json({ message: 'No conversation found for this user' });
+        }
         res.json(conversation);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 

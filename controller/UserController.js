@@ -3,6 +3,8 @@ const User = require('../models/User');
 const BookMark = require('../models/BookMark');
 const cloudinary = require('../config/cloudinary');
 const getDataUri = require('../config/DataUri');
+const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 
 const dotenv = require('dotenv').config();
 
@@ -209,6 +211,16 @@ const deleteUser = async (req, res) => {
             await cloudinary.uploader.destroy(findUser.userImage.public_id);
         }
 
+        // Find all conversations where the user is a member
+        const conversations = await Conversation.find({ members: userId });
+
+        // Delete all messages related to the user in those conversations
+        await Promise.all(conversations.map(conversation => {
+            return Message.deleteMany({ conversationId: conversation._id, sender: userId });
+        }));
+
+        // Delete all conversations where the user is a member
+        await Conversation.deleteMany({ members: userId });
 
         await BookMark.deleteMany({
             $or: [

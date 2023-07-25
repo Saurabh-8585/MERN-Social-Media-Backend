@@ -206,7 +206,7 @@ const addNewPassword = async (req, res) => {
                 let mail = MailGenerator.generate(response)
                 let mailMessage = messageInfo(user.email, 'Password Reset Successful', mail)
                 transporter.sendMail(mailMessage)
-                    .then(() => res.status(200).json({ message:'Password updated successfully'}))
+                    .then(() => res.status(200).json({ message: 'Password updated successfully' }))
                     .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }))
             }
         } catch (err) {
@@ -223,4 +223,4 @@ const addNewPassword = async (req, res) => {
 }
 
 
-module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword }
+module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword,generateToken }

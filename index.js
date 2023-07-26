@@ -1,17 +1,17 @@
+const connectToMongo = require('./database/db');
 const dotenv = require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-const connectToMongo = require('./database/db');
+const passport = require('passport');
+const { Server } = require('socket.io');
+const session = require('express-session');
 const auth = require('./routes/AuthRoute');
 const post = require('./routes/PostRoute');
 const user = require('./routes/UserRoute');
 const bookMark = require('./routes/BookMarkRoute');
 const message = require('./routes/MessageRoute');
 const conversation = require('./routes/ConversationRoute');
-const passport = require('passport');
-const { Server } = require('socket.io');
-const session = require('express-session');
 const checkOrigin = require('./middleware/ApiAuth');
 
 connectToMongo();
@@ -27,9 +27,9 @@ const sessionMiddleware = session({
   secret: 'saurabh',
   resave: false,
   saveUninitialized: false,
-  store: new (require('session-file-store')(session))(fileStoreOptions),
   cookie: { maxAge: 24 * 60 * 60 * 1000 },
 });
+
 app.use(sessionMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))

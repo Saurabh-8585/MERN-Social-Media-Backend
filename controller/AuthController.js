@@ -2,9 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
-const nodemailer = require('nodemailer');
-const Mailgen = require('mailgen');
-const { messageInfo, config } = require('../Mail/MailUtils');
+const {generateMail } = require('../Mail/MailUtils');
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -29,12 +27,10 @@ const SignUp = async (req, res) => {
 
         await newUser.save();
         const token = generateToken(newUser);
-        res.cookie('token', token);
-
         res.status(200).json({ message: `Welcome ${newUser.username}`, token });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Something went wrong' });
     }
 };
 
@@ -58,7 +54,7 @@ const SignIn = async (req, res) => {
         res.status(200).json({ message: `Welcome Back ${user.username}`, token });
     } catch (error) {
 
-        return res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Something went wrong' });
     }
 };
 
@@ -79,16 +75,6 @@ const resetPassword = async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         await User.findByIdAndUpdate(user, { $set: { password: hashedPassword } })
-        let transporter = nodemailer.createTransport(config);
-        let MailGenerator = new Mailgen({
-            theme: {
-                customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
-            },
-            product: {
-                name: "Snapia",
-                link: process.env.FRONTEND_URL
-            }
-        })
         const response = {
             body: {
                 name: user.username,
@@ -96,19 +82,19 @@ const resetPassword = async (req, res) => {
                 content: 'Your password has been successfully reset. You can now log in using your new password.',
                 outro: 'If you did not request a password reset, please contact our support team immediately.',
                 signature: 'Best regards,\nSnapia', // Add your custom email signature here
-            },
-
-
+            }
         };
-        let mail = MailGenerator.generate(response)
-        let mailMessage = messageInfo(user.email, 'Password Reset Successful', mail)
-        transporter.sendMail(mailMessage)
-            .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }))
+
+        await generateMail({
+            emailBody: response,
+            to: user.email,
+            subject: 'Password Reset Successful'
+        });
 
         return res.status(200).json({ message: 'Password update successfully ' });
 
     } catch (error) {
-        return res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Something went wrong' });
     }
 }
 
@@ -124,16 +110,6 @@ const forgotPassword = async (req, res) => {
         const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
         const link = `${process.env.FRONTEND_URL}/reset-password/${user._id}/${token}`;
 
-        let transporter = nodemailer.createTransport(config);
-        let MailGenerator = new Mailgen({
-            theme: {
-                customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
-            },
-            product: {
-                name: "Snapia",
-                link: process.env.FRONTEND_URL
-            }
-        })
 
         const response = {
             body: {
@@ -152,18 +128,16 @@ const forgotPassword = async (req, res) => {
             },
         };
 
-        let mail = MailGenerator.generate(response)
+        await generateMail({
+            emailBody: response,
+            to: user.email,
+            subject: 'Forgot Password Request'
+        });
 
-        let mailMessage = messageInfo(user.email, 'Forgot Password Request', mail)
-
-        transporter.sendMail(mailMessage)
-            .then(() => res.status(201).json({ message: 'An email has been sent. Please check your inbox.' }))
-            .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }));
-
-
+        res.status(201).json({ message: 'An email has been sent. Please check your inbox.' })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Something went wrong' });
     }
 }
 
@@ -181,17 +155,7 @@ const addNewPassword = async (req, res) => {
             if (isValid) {
                 const hashPassword = await bcrypt.hash(newPassword, 10);
                 await User.findByIdAndUpdate(user._id, { $set: { password: hashPassword } });
-                let transporter = nodemailer.createTransport(config);
 
-                let MailGenerator = new Mailgen({
-                    theme: {
-                        customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
-                    },
-                    product: {
-                        name: "Snapia",
-                        link: process.env.FRONTEND_URL
-                    }
-                })
                 const response = {
                     body: {
                         name: user.username,
@@ -203,11 +167,12 @@ const addNewPassword = async (req, res) => {
 
 
                 };
-                let mail = MailGenerator.generate(response)
-                let mailMessage = messageInfo(user.email, 'Password Reset Successful', mail)
-                transporter.sendMail(mailMessage)
-                    .then(() => res.status(200).json({ message: 'Password updated successfully' }))
-                    .catch(() => res.status(500).json({ message: 'Oops! Something went wrong. Please try again later.' }))
+                await generateMail({
+                    emailBody: response,
+                    to: user.email,
+                    subject: 'Password Reset Successful'
+                });
+                res.status(200).json({ message: 'Password updated successfully' })
             }
         } catch (err) {
             if (err instanceof jwt.TokenExpiredError) {
@@ -218,9 +183,9 @@ const addNewPassword = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: 'Server error' });
+        return res.status(500).json({ message: 'Something went wrong' });
     }
 }
 
 
-module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword,generateToken }
+module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword, generateToken }

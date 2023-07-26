@@ -4,9 +4,7 @@ const User = require('../models/User');
 const { generateToken } = require('../controller/AuthController');
 const dotenv = require('dotenv').config();
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
-const Mailgen = require('mailgen');
-const { messageInfo, config } = require('../Mail/MailUtils');
+const { generateMail } = require('../Mail/MailUtils');
 
 
 
@@ -16,13 +14,18 @@ function generateRandomPassword() {
     const digits = '0123456789';
     const allowedChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const allChars = allowedChars + specialChars + digits;
+    const minLength = 6;
+    const maxLength = 16;
+    const passwordLength = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
     let password = '';
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < passwordLength; i++) {
         const char = allChars[Math.floor(Math.random() * allChars.length)];
         password += char;
     }
     return password;
 }
+
+
 passport.use(
     new GoogleStrategy(
         {
@@ -51,35 +54,31 @@ passport.use(
                 await newUser.save();
                 const token = generateToken(newUser);
 
+                const response = {
+                    body: {
+                        name: profile.displayName,
+                        intro: 'Welcome to Snapia!',
+                        outro: [
+                            'You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you',
 
-                // let transporter = nodemailer.createTransport(config);
-                // let MailGenerator = new Mailgen({
-                //     theme: {
-                //         customCss: '.body { font-family: Arial, sans-serif; } .footer { text-align: center; }'
-                //     },
-                //     product: {
-                //         name: "Snapia",
-                //         link: process.env.FRONTEND_URL
-                //     }
-                // });
+                            `<b>Temporary Password </b> : ${tempPassword}`,
 
-                // const response = {
-                //     body: {
-                //         name: newUser.username,
-                //         intro: 'Welcome to Snapia!',
-                //         content: `You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you: here is your temporary password : ${tempPassword}`,
-                //         outro: 'You can change your password whenever you want by going to your account settings.',
-                //         signature: 'Best regards,\nSnapia Team',
-                //     },
-                // };
+                            'For security purposes, we recommend that you change this temporary password at your earliest convenience. You can do so by visiting your account settings on Snapia\'s platform.',
 
-                // let mail = MailGenerator.generate(response)
+                            'If you have any questions or need further assistance, feel free to reach out to our support team. Welcome to Snapia, and we look forward to providing you with a seamless experience!',
 
-                // let mailMessage = messageInfo(newUser.email, 'Welcome to Snapia', mail)
-                // transporter.sendMail(mailMessage).catch((error) => {
-                //     return done(error, false);
-                // });
-                return done(null, { message: `Welcome ${newUser.username}`, token });
+                        ],
+
+                        signature: 'Best regards,<br>Snapia Team'
+                    }
+                };
+
+                await generateMail({
+                    emailBody: response,
+                    to: profile.emails[0].value,
+                    subject: 'Welcome to Snapia!'
+                });
+                return done(null, { message: `Welcome ${newUser.username} ,Please check mail`, token });
             } catch (error) {
 
                 return done(error, false);

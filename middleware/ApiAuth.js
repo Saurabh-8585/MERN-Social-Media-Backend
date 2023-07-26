@@ -1,20 +1,19 @@
 const dotenv = require('dotenv').config();
-
 function checkOrigin(req, res, next) {
     const allowedOrigins = [process.env.FRONTEND_URL, process.env.BACKEND_URL];
+
     const origin = req.headers.origin;
 
     if (allowedOrigins.includes(origin)) {
-        res.set({
-            'Access-Control-Allow-Origin': origin,
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Credentials': true
-        });
-        next();
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     } else {
-        res.status(403).json({ error: 'Forbidden' });
+        return res.status(403).json({ error: 'Forbidden' });
     }
+
+    next();
 }
+
 
 module.exports = checkOrigin;

@@ -17,13 +17,13 @@ const checkOrigin = require('./middleware/ApiAuth');
 connectToMongo();
 const app = express();
 const port = 5000;
-
-app.use(cors({ origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL], methods: "GET,POST,PUT,DELETE", credentials: true }));
-// app.use(checkOrigin)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+app.use(cors());
+app.use(checkOrigin)
 app.use(
   session({
-    secret: "lama",
+    secret: "saurabh",
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 } 

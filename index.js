@@ -20,7 +20,7 @@ const port = 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
-app.use(checkOrigin)
+// app.use(checkOrigin)
 app.use(
   session({
     secret: "saurabh",

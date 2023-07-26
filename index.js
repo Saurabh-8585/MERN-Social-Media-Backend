@@ -17,7 +17,9 @@ const checkOrigin = require('./middleware/ApiAuth');
 connectToMongo();
 const app = express();
 const port = 5000;
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+app.use(cors());
 // app.use(checkOrigin)
 const fileStoreOptions = {
   path: './sessions', 
@@ -31,9 +33,6 @@ const sessionMiddleware = session({
   cookie: { maxAge: 24 * 60 * 60 * 1000 },
 });
 app.use(sessionMiddleware);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
-app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 

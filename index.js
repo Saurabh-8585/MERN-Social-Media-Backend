@@ -14,12 +14,12 @@ const cookieSession = require('cookie-session');
 const passportSetup = require('./config/passport');
 const { Server } = require('socket.io');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 connectToMongo();
 const app = express();
 const port = 5000;
 
-// Middleware
 app.use(cors({ origin: process.env.FRONTEND_URL, methods: "GET,POST,PUT,DELETE", credentials: true }));
 app.use(express.json());
 app.use(
@@ -27,7 +27,8 @@ app.use(
     secret: "lama",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } 
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
+    cookie: { maxAge: 24 * 60 * 60 * 1000 }
   })
 );
 app.use(passport.initialize());

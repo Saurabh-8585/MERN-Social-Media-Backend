@@ -23,7 +23,7 @@ let transporter = nodemailer.createTransport(config);
 
 const generateMail = async ({ emailBody, to, subject }) => {
     try {
-        
+
         let mail = MailGenerator.generate(emailBody);
         let mailMessage = {
             from: process.env.EMAIL,
@@ -31,7 +31,7 @@ const generateMail = async ({ emailBody, to, subject }) => {
             subject,
             html: mail
         };
-        
+
         await transporter.sendMail(mailMessage);
     } catch (error) {
         throw error;

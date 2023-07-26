@@ -10,17 +10,16 @@ const bookMark = require('./routes/BookMarkRoute');
 const message = require('./routes/MessageRoute');
 const conversation = require('./routes/ConversationRoute');
 const passport = require('passport');
-const cookieSession = require('cookie-session');
-const passportSetup = require('./config/passport');
 const { Server } = require('socket.io');
 const session = require('express-session');
+const checkOrigin = require('./middleware/ApiAuth');
 
 connectToMongo();
 const app = express();
 const port = 5000;
 
-// Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL, methods: "GET,POST,PUT,DELETE", credentials: true }));
+app.use(cors({ origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL], methods: "GET,POST,PUT,DELETE", credentials: true }));
+// app.use(checkOrigin)
 app.use(express.json());
 app.use(
   session({

@@ -17,18 +17,23 @@ const checkOrigin = require('./middleware/ApiAuth');
 connectToMongo();
 const app = express();
 const port = 5000;
+
+// app.use(checkOrigin)
+const fileStoreOptions = {
+  path: './sessions', 
+  ttl: 86400, 
+};
+const sessionMiddleware = session({
+  secret: 'saurabh',
+  resave: false,
+  saveUninitialized: false,
+  store: new (require('session-file-store')(session))(fileStoreOptions),
+  cookie: { maxAge: 24 * 60 * 60 * 1000 },
+});
+app.use(sessionMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(cors());
-// app.use(checkOrigin)
-app.use(
-  session({
-    secret: "saurabh",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } 
-  })
-);
 app.use(passport.initialize());
 app.use(passport.session());
 

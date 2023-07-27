@@ -20,7 +20,11 @@ connectToMongo();
 const app = express();
 const port = 5000;
 
-app.use(cors({ origin: process.env.FRONTEND_URL, methods: "GET,POST,PUT,DELETE", credentials: true }));
+app.use(cors({
+  origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true
+}));
 app.use(express.json());
 app.use(
   session({

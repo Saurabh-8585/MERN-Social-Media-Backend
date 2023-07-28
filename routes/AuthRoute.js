@@ -14,15 +14,15 @@ router.put('/new/password/:id/:token', addNewPassword);
 
 // Login with Google
 router.get('/login/success', (req, res) => {
-    if (req.isAuthenticated()) {
-        res.status(200).json({
-            error: false,
-            message: "Successfully Logged In",
-            user: req.user,
-        });
-    } else {
-        res.status(403).json({ error: true, message: "Not Authorized" });
-    }
+    if (req.user) {
+		res.status(200).json({
+			error: false,
+			message: "Successfully Loged In",
+			user: req.user,
+		});
+	} else {
+		res.status(403).json({ error: true, message: "Not Authorized" });
+	};
 });
 
 router.get('/login/failed', (req, res) => {
@@ -40,8 +40,12 @@ router.get('/google/callback', passport.authenticate('google', {
 }));
 
 router.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect(process.env.FRONTEND_URL);
+    req.logout(function (err) {
+        if (err) {
+            return res.status(500).json({ error: true, message: 'Logout failed' });
+        }
+        res.redirect(process.env.FRONTEND_URL);
+    });
 });
 
 

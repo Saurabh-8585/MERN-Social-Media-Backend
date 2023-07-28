@@ -30,7 +30,7 @@ const createPost = async (req, res) => {
             postImage
         });
 
-        const savedPost = await newPost.save();
+        await newPost.save();
 
         return res.status(200).json({ message: 'Posted successfully' });
     } catch (error) {
@@ -44,11 +44,6 @@ const deletePost = async (req, res) => {
     const { user } = req;
 
     try {
-        // const isUser = await User.exists({ _id: user });
-        // if (!isUser) {
-        //     return res.status(401).json({ message: 'User not found' });
-        // }
-
         const SelectedPost = await Post.findById(id);
         if (!SelectedPost) {
             return res.status(401).json({ message: 'Post not found' });

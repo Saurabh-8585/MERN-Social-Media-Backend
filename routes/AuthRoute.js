@@ -14,18 +14,19 @@ router.put('/new/password/:id/:token', addNewPassword);
 
 // Login with Google
 router.get('/login/success', (req, res) => {
-    if (req.user) {
-        res.status(200).json({
+    const responseData = req.user
+        ? {
             message: 'Login Success',
             user: req.user,
             error: false,
-        });
-    } else {
-        res.status(401).json({
+        }
+        : {
             error: true,
             message: 'Not Authorized',
-        });
-    }
+        };
+
+    const status = req.user ? 200 : 401;
+    res.status(status).json(responseData);
 });
 
 router.get('/login/failed', (req, res) => {
@@ -38,7 +39,7 @@ router.get('/login/failed', (req, res) => {
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', passport.authenticate('google', {
-    successRedirect: `${process.env.FRONTEND_URL}/?code=SUCCESS`,
+    successRedirect: `${process.env.FRONTEND_URL}/login/success`,
     failureRedirect: process.env.FRONTEND_URL,
 }));
 

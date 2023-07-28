@@ -21,7 +21,7 @@ const app = express();
 const port = 5000;
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(helmet());
+// app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true

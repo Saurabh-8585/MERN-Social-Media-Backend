@@ -16,12 +16,14 @@ const { Server } = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
+const logger = require('morgan');
 connectToMongo();
 const app = express();
 const port = 5000;
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-// app.use(helmet());
+app.use(logger('dev'));
+app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true

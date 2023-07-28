@@ -21,10 +21,11 @@ const app = express();
 const port = 5000;
 
 app.use(cors({
-  origin: "*",
+  origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL, 'https://snapia.vercel.app'],
   methods: "GET,POST,PUT,DELETE",
   credentials: true
 }));
+
 app.use(express.json());
 app.use(
   session({

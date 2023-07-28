@@ -15,14 +15,15 @@ const passportSetup = require('./config/passport');
 const { Server } = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-
+const helmet = require('helmet');
 connectToMongo();
 const app = express();
 const port = 5000;
-
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL,
-  methods: "GET,POST,PUT,DELETE",
   credentials: true
 }));
 
@@ -30,8 +31,8 @@ app.use(express.json());
 app.use(
   session({
     secret: "lama",
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
     cookie: { maxAge: 24 * 60 * 60 * 1000 }
   })

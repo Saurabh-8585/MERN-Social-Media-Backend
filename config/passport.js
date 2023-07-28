@@ -38,8 +38,8 @@ passport.use(
             try {
                 const existingUser = await User.findOne({ email: profile.emails[0].value });
                 if (existingUser) {
-                    const userToken = generateToken(existingUser);
-                    return done(null, { message: `Welcome back ${existingUser.username}`, token: userToken });
+                    // const userToken = generateToken(existingUser);
+                    return done(null,  existingUser);
                 }
 
                 let tempPassword = generateRandomPassword();
@@ -48,11 +48,14 @@ passport.use(
                 const newUser = new User({
                     username: profile.displayName,
                     email: profile.emails[0].value,
+                    userImage: {
+                        url: profile.photos[0].value
+                    },
                     password: hashedPassword,
                 });
 
-                await newUser.save();
-                const token = generateToken(newUser);
+              const savedUser=  await newUser.save();
+                // const token = generateToken(newUser);
 
                 const response = {
                     body: {
@@ -78,7 +81,7 @@ passport.use(
                     to: profile.emails[0].value,
                     subject: 'Welcome to Snapia!'
                 });
-                return done(null, { message: `Welcome ${newUser.username} ,Please check mail`, token });
+                return done(null, savedUser );
             } catch (error) {
 
                 return done(error, false);
@@ -89,10 +92,11 @@ passport.use(
 
 
 passport.serializeUser((user, done) => {
-    done(null, user);
+    done(null, user._id);
 });
 
-passport.deserializeUser((user, done) => {
+passport.deserializeUser(async(id, done) => {
+    const user = await User.findById(id);
     done(null, user);
 });
 

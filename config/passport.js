@@ -31,7 +31,7 @@ passport.use(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/api/auth/google/callback',
+            callbackURL: 'http://snapia-backend.vercel.app/api/auth/google/callback',
             scope: ['profile', 'email'],
         },
         async function (accessToken, refreshToken, profile, done) {

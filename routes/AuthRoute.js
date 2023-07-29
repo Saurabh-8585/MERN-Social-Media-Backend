@@ -14,6 +14,7 @@ router.put('/new/password/:id/:token', addNewPassword);
 
 // Login with Google
 router.get('/login/success', (req, res) => {
+
     if (req.user) {
         res.status(200).json({
             error: false,

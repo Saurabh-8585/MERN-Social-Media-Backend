@@ -32,11 +32,11 @@ app.use(cors({
 app.use(express.json());
 app.use(
   session({
-    secret: "lama",
+    secret: "snapia",
     resave: true,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }
+    cookie: { maxAge: 60 * 60 * 1000 } 
   })
 );
 app.use(passport.initialize());

@@ -183,10 +183,9 @@ const updateUserProfile = async (req, res) => {
 
         user.email = email;
         user.username = username;
-        user.about = about;
-        user.location = location
-        user.website = website
-
+        if (about !== 'undefined') user.about = about;
+        if (location !== 'undefined') user.location = location;
+        if (website !== 'undefined') user.website = website;+
         await user.save();
 
         res.status(200).json({ message: 'Profile updated successfully' });

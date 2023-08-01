@@ -4,6 +4,7 @@ const http = require('http');
 const connectToMongo = require('./database/db');
 const auth = require('./routes/AuthRoute');
 const post = require('./routes/PostRoute');
+const cors = require('cors');
 const user = require('./routes/UserRoute');
 const bookMark = require('./routes/BookMarkRoute');
 const message = require('./routes/MessageRoute');
@@ -26,10 +27,11 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(logger('dev'));
 app.use(helmet());
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+//   credentials: true
+// }));
+app.use(cors())
 // app.use(checkOrigin)
 
 app.use(express.json());

@@ -1,7 +1,6 @@
 const dotenv = require('dotenv').config();
 const express = require('express');
 const http = require('http');
-const cors = require('cors');
 const connectToMongo = require('./database/db');
 const auth = require('./routes/AuthRoute');
 const post = require('./routes/PostRoute');
@@ -10,13 +9,13 @@ const bookMark = require('./routes/BookMarkRoute');
 const message = require('./routes/MessageRoute');
 const conversation = require('./routes/ConversationRoute');
 const passport = require('passport');
-const cookieSession = require('cookie-session');
 const passportSetup = require('./config/passport');
 const { Server } = require('socket.io');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const logger = require('morgan');
+const checkOrigin = require('./middleware/ApiAuth');
 
 
 
@@ -27,10 +26,11 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(logger('dev'));
 app.use(helmet());
-app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2],
+//   credentials: true
+// }));
+app.use(checkOrigin)
 
 app.use(express.json());
 app.use(

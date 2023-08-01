@@ -12,7 +12,7 @@ const {
     addComment,
     removeComment,
     editComment,
-    
+
 }
     = require('../controller/PostController');
 const upload = require('../config/multer');

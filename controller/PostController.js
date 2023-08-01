@@ -6,12 +6,22 @@ const getDataUri = require('../config/DataUri');
 const mongoose = require('mongoose');
 
 
+
+
+
 const createPost = async (req, res) => {
-    const { content } = req.body;
+    const { content, postLocation } = req.body;
     const file = req.file;
+    console.log({postLocation});
     const user = await User.findById(req.user);
     try {
         let postImage = null;
+        let location = null;
+        if (postLocation) {
+            location = postLocation
+        }
+        console.log({location});
+
         if (file) {
             const fileUri = getDataUri(file);
 
@@ -22,12 +32,14 @@ const createPost = async (req, res) => {
             postImage = {
                 public_id: myCloud.public_id,
                 url: myCloud.secure_url,
+            
             };
         }
         const newPost = new Post({
             content,
             author: user._id,
-            postImage
+            postImage,
+            location
         });
 
         await newPost.save();
@@ -38,6 +50,7 @@ const createPost = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 const deletePost = async (req, res) => {
     const { id } = req.params;
@@ -144,7 +157,7 @@ const singleUserPosts = async (req, res) => {
                     path: 'user commentLikes',
                     select: '-password -updatedAt -createdAt -email',
                 },
-            });;
+            }).sort({ createdAt: -1 });;
         return res.status(200).json({ post: findUserPosts });
     } catch (error) {
         console.error(error);
@@ -253,6 +266,7 @@ const addComment = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 }
+
 const removeComment = async (req, res) => {
     const { PostID, commentId } = req.params;
     const user = req.user;
@@ -339,6 +353,7 @@ module.exports = {
     removeLike,
     addComment,
     removeComment,
-    editComment
+    editComment,
+
 
 }

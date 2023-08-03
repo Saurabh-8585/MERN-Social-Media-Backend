@@ -31,8 +31,8 @@ app.use(helmet());
 //   origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
 //   credentials: true
 // }));
-app.use(cors())
-// app.use(checkOrigin)
+
+app.use(checkOrigin)
 
 app.use(express.json());
 app.use(

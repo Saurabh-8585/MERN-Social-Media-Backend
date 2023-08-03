@@ -32,7 +32,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(checkOrigin())
+app.use(checkOrigin)
 
 app.use(express.json());
 app.use(

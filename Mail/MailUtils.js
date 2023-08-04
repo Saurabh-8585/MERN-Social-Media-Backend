@@ -15,7 +15,7 @@ let MailGenerator = new Mailgen({
     },
     product: {
         name: "Snapia",
-        link: process.env.FRONTEND_URL
+        link: process.env.FRONTEND_URL_2
     }
 });
 

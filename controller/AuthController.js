@@ -2,7 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
-const {generateMail } = require('../Mail/MailUtils');
+const { generateMail } = require('../Mail/MailUtils');
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -94,6 +94,7 @@ const resetPassword = async (req, res) => {
         return res.status(200).json({ message: 'Password update successfully ' });
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({ message: 'Something went wrong' });
     }
 }
@@ -103,7 +104,7 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     try {
         const user = await User.findOne({ email });
-        console.log({user});
+        console.log({ user });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -179,6 +180,8 @@ const addNewPassword = async (req, res) => {
             if (err instanceof jwt.TokenExpiredError) {
                 return res.status(400).json({ message: 'Link has been expired' });
             }
+
+          
             throw err;
         }
 

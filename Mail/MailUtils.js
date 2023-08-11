@@ -21,6 +21,40 @@ let MailGenerator = new Mailgen({
 
 let transporter = nodemailer.createTransport(config);
 
+const resetResponse = (username) => {
+    const response = {
+        body: {
+            name: username,
+            intro: 'Password Reset Successful',
+            content: 'Your password has been successfully reset. You can now log in using your new password.',
+            outro: 'If you did not request a password reset, please contact our support team immediately.',
+            signature: 'Best regards,\nSnapia', // Add your custom email signature here
+        }
+    };
+    return response;
+}
+
+const forgotPasswordResponse = (username, link) => {
+    const response = {
+        body: {
+            name: username,
+            intro: 'Forgot Password Request',
+            action: {
+                instructions: 'You are receiving this email because you requested a password reset. To reset your password, click the button below:',
+                button: {
+                    color: '#A855F7',
+                    text: 'Reset Your Password',
+                    link
+                },
+            },
+            outro: 'If you did not request a password reset, please ignore this email.',
+            signature: 'Best regards,\nSnapia Team',
+        },
+    };
+    return response;
+
+}
+
 const generateMail = async ({ emailBody, to, subject }) => {
     try {
 
@@ -37,4 +71,4 @@ const generateMail = async ({ emailBody, to, subject }) => {
         throw error;
     }
 }
-module.exports = { generateMail }
+module.exports = { generateMail, resetResponse, forgotPasswordResponse, }

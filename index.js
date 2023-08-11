@@ -34,7 +34,6 @@ app.use(cors({
 
 // app.use(checkOrigin)
 
-app.use(express.json());
 app.use(
   session({
     secret: "snapia",
@@ -43,11 +42,11 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
     cookie: { maxAge: 60 * 60 * 1000 } 
   })
-);
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Routes
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  // Routes
 app.use('/api/auth', auth);
 app.use('/api/user', user);
 app.use('/api/post', post);

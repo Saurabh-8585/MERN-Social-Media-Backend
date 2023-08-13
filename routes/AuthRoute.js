@@ -35,30 +35,11 @@ router.get('/login/failed', (req, res) => {
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-// router.get('/google/callback', passport.authenticate('google', {
-//     successRedirect: `${process.env.FRONTEND_URL}/login/success`,
-//     failureRedirect: process.env.FRONTEND_URL,
-// }));
+router.get('/google/callback', passport.authenticate('google', {
+    successRedirect: `${process.env.FRONTEND_URL}/login/success`,
+    failureRedirect: process.env.FRONTEND_URL,
+}));
 
-router.get('/google/callback', (req, res, next) => {
-    passport.authenticate('google', (err, user) => {
-        if (err) {
-            return next(err);
-        }
-        if (!user) {
-       
-            return res.redirect(process.env.FRONTEND_URL);
-        }
-        const script = `
-            <script>
-                // Open the success URL in a new tab
-                window.open("${process.env.FRONTEND_URL}/login/success", "_blank");
-            </script>
-        `;
-        // Send the response with the JavaScript
-        return res.send(script);
-    })(req, res, next);
-});
 
 router.get('/logout', (req, res) => {
     req.logout(function (err) {

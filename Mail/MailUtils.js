@@ -21,6 +21,19 @@ let MailGenerator = new Mailgen({
 
 let transporter = nodemailer.createTransport(config);
 
+const welcomeResponse = (username) => {
+    const response = {
+        body: {
+            name: username,
+            intro: 'Welcome to Our Platform!',
+            content: 'Thank you for joining our platform. We are excited to have you on board and look forward to providing you with a great experience.',
+            outro: 'If you have any questions or need assistance, feel free to contact our support team.',
+            signature: 'Best regards,\nSnapia', 
+        }
+    };
+    return response;
+}
+
 const resetResponse = (username) => {
     const response = {
         body: {
@@ -71,4 +84,4 @@ const generateMail = async ({ emailBody, to, subject }) => {
         throw error;
     }
 }
-module.exports = { generateMail, resetResponse, forgotPasswordResponse, }
+module.exports = { generateMail, resetResponse, forgotPasswordResponse,welcomeResponse }

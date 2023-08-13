@@ -2,7 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
-const { generateMail, resetResponse, forgotPasswordResponse } = require('../Mail/MailUtils');
+const { generateMail, resetResponse, forgotPasswordResponse, welcomeResponse } = require('../Mail/MailUtils');
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -23,6 +23,13 @@ const SignUp = async (req, res) => {
             username,
             email,
             password: hashedPassword,
+        });
+
+        const response = welcomeResponse(username);
+        await generateMail({
+            emailBody: response,
+            to: email,
+            subject: 'Welcome to Our Platform!'
         });
 
         await newUser.save();
@@ -101,7 +108,7 @@ const forgotPassword = async (req, res) => {
         const secretKey = user._id + process.env.JWT_SECRET;
         const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
         const link = `${process.env.FRONTEND_URL}/reset-password/${user._id}/${token}`;
-        const response = forgotPasswordResponse(user.username,link)
+        const response = forgotPasswordResponse(user.username, link)
         await generateMail({
             emailBody: response,
             to: user.email,

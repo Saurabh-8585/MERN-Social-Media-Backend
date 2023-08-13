@@ -56,7 +56,7 @@ const SignIn = async (req, res) => {
 
         const token = generateToken(user);
 
-        res.cookie('token', token);
+       
 
         res.status(200).json({ message: `Welcome Back ${user.username}`, token });
     } catch (error) {

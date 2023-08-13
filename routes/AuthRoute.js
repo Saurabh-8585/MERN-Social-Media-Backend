@@ -49,7 +49,14 @@ router.get('/google/callback', (req, res, next) => {
        
             return res.redirect(process.env.FRONTEND_URL);
         }
-        return res.redirect(`${process.env.FRONTEND_URL}/login/success`);
+        const script = `
+            <script>
+                // Open the success URL in a new tab
+                window.open("${process.env.FRONTEND_URL}/login/success", "_blank");
+            </script>
+        `;
+        // Send the response with the JavaScript
+        return res.send(script);
     })(req, res, next);
 });
 

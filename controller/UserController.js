@@ -128,23 +128,6 @@ const unFollowUser = async (req, res) => {
     }
 }
 
-
-const checkCurrentUser = async (req, res) => {
-    let user = req.user;
-    try {
-        const isUser = await User.findById(user);
-
-        if (!isUser) {
-            return res.status(401).json({ message: 'User not found' });
-        } else {
-            return res.status(200).json({ id: isUser._id });
-        }
-    } catch (error) {
-        return res.status(500).json({ message: 'Server error' });
-    }
-}
-
-
 const updateUserProfile = async (req, res) => {
     const { id } = req.params;
     const { email, username, about, location, image, website } = req.body;
@@ -260,4 +243,4 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { checkCurrentUser, getAllUsersData, followUser, getSingleUserData, unFollowUser, updateUserProfile, deleteUser }
+module.exports = { getAllUsersData, followUser, getSingleUserData, unFollowUser, updateUserProfile, deleteUser }

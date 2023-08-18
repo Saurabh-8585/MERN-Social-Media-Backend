@@ -74,7 +74,7 @@ const temporaryPasswordResponse = (name, tempPassword) => {
             name: name,
             intro: 'Welcome to Snapia!',
             action: {
-                instructions: 'You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you,For security purposes, we recommend that you change this temporary password at your earliest convenience',
+                instructions: 'You are receiving this email because you logged in with your Google account.',
                 color: '#A855F7',
                 text: tempPassword,
                 link:'https://snapia.vercel.app/settings'

@@ -91,12 +91,12 @@ const generateAccountGoogleUser = async (req, res) => {
         });
         await newUser.save();
         const token = generateToken(newUser);
-        // const response = temporaryPasswordResponse(name,tempPassword)
-        // await generateMail({
-        //     emailBody: response,
-        //     to: email,
-        //     subject: 'Welcome to Snapia!'
-        // });
+        const response = temporaryPasswordResponse(name,tempPassword)
+        await generateMail({
+            emailBody: response,
+            to: email,
+            subject: 'Welcome to Snapia!'
+        });
         return res.status(200).json({ message: `Welcome ${newUser.username} ,Please check mail`, token });
     } catch (error) {
 

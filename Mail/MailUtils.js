@@ -23,18 +23,19 @@ let MailGenerator = new Mailgen({
 let transporter = nodemailer.createTransport(config);
 
 
-const welcomeResponse = (username) => {
-    const response = {
-        body: {
-            name: username,
-            intro: '<h1 style="color: #A855F7; font-size: 24px;">Welcome to Our Platform!</h1>',
-            content: '<p style="font-size: 16px;">Thank you for joining our platform. We are excited to have you on board and look forward to providing you with a great experience.</p>',
-            outro: '<p style="font-size: 16px;">If you have any questions or need assistance, feel free to contact our support team.</p>',
-            signature: '<p style="font-size: 16px; margin-top: 20px;">Best regards,<br><strong>Snapia</strong></p>',
-        }
-    };
-    return response;
-}
+// const welcomeResponse = (username) => {
+//     const response = {
+//         body: {
+//             name: username,
+//             intro: '<h1 style="color: #A855F7; font-size: 24px;">Welcome to Our Platform!</h1>',
+//             content: '<p style="font-size: 16px;">Thank you for joining our platform. We are excited to have you on board and look forward to providing you with a great experience.</p>',
+//             outro: '<p style="font-size: 16px;">If you have any questions or need assistance, feel free to contact our support team.</p>',
+//             signature: '<p style="font-size: 16px; margin-top: 20px;">Best regards,<br><strong>Snapia</strong></p>',
+//         }
+//     };
+//     return response;
+// }
+
 const resetResponse = (username) => {
     const response = {
         body: {
@@ -92,11 +93,10 @@ const generateMail = async ({ emailBody, to, subject }) => {
             subject,
             html: mail
         };
-
         await transporter.sendMail(mailMessage);
     } catch (error) {
         console.log(error);
         throw error;
     }
 }
-module.exports = { generateMail, resetResponse, forgotPasswordResponse, welcomeResponse, temporaryPasswordResponse }
+module.exports = { generateMail, resetResponse, forgotPasswordResponse, temporaryPasswordResponse }

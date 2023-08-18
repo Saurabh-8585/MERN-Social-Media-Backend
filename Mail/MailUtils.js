@@ -73,13 +73,14 @@ const temporaryPasswordResponse = (name, tempPassword) => {
         body: {
             name: name,
             intro: 'Welcome to Snapia!',
-            content: `You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you,Temporary Password : ${tempPassword}, For security purposes, we recommend that you change this temporary password at your earliest convenience. You can do so by visiting your account settings on Snapia platform.,If you have any questions or need further assistance, feel free to reach out to our support team. Welcome to Snapia, and we look forward to providing you with a seamless experience!`,
+            content: 'You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you, Temporary Password: ' + tempPassword + '. For security purposes, we recommend that you change this temporary password at your earliest convenience. You can do so by visiting your account settings on Snapia platform. If you have any questions or need further assistance, feel free to reach out to our support team. Welcome to Snapia, and we look forward to providing you with a seamless experience!',
             outro: 'If you have any questions or need assistance, feel free to contact our support team.',
-            signature: 'Best regards,Snapia',
+            signature: 'Best regards, Snapia',
         }
     };
-    return response
-}
+    return response;
+};
+
 
 const generateMail = async ({ emailBody, to, subject }) => {
     try {

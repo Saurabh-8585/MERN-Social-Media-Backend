@@ -68,6 +68,20 @@ const forgotPasswordResponse = (username, link) => {
     return response;
 
 }
+const temporaryPasswordResponse = (name, tempPassword) => {
+    const response = {
+        body: {
+            name: name,
+            intro: 'Welcome to Snapia!',
+            content: `You are receiving this email because you logged in with your Google account. As this is your first login, we have generated a temporary password for you',
+                <b>Temporary Password </b> : ${tempPassword},
+                'For security purposes, we recommend that you change this temporary password at your earliest convenience. You can do so by visiting your account settings on Snapia\'s platform.',
+                'If you have any questions or need further assistance, feel free to reach out to our support team. Welcome to Snapia, and we look forward to providing you with a seamless experience!`,
+            signature: 'Best regards,<br>Snapia Team'
+        }
+    };
+    return response
+}
 
 const generateMail = async ({ emailBody, to, subject }) => {
     try {
@@ -82,7 +96,8 @@ const generateMail = async ({ emailBody, to, subject }) => {
 
         await transporter.sendMail(mailMessage);
     } catch (error) {
+        console.log(error);
         throw error;
     }
 }
-module.exports = { generateMail, resetResponse, forgotPasswordResponse,welcomeResponse }
+module.exports = { generateMail, resetResponse, forgotPasswordResponse, welcomeResponse, temporaryPasswordResponse }

@@ -2,7 +2,16 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
-const { generateMail, resetResponse, forgotPasswordResponse, welcomeResponse } = require('../Mail/MailUtils');
+const { generatePassword } = require('../utils/genratePassword');
+const {
+    generateMail,
+    resetResponse,
+    forgotPasswordResponse,
+    welcomeResponse,
+    temporaryPasswordResponse,
+} = require('../Mail/MailUtils');
+
+
 const generateToken = (user) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET,);
     return token;
@@ -56,14 +65,43 @@ const SignIn = async (req, res) => {
 
         const token = generateToken(user);
 
-       
-
         res.status(200).json({ message: `Welcome Back ${user.username}`, token });
     } catch (error) {
 
         return res.status(500).json({ message: 'Something went wrong' });
     }
 };
+
+const generateAccountGoogleUser = async (req, res) => {
+    const { email, name, picture } = req.body;
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            const userToken = generateToken(existingUser);
+            return res.status(200).json({ message: `Welcome back ${existingUser.username}`, token: userToken });
+        }
+
+        let tempPassword = generatePassword();
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+        const newUser = new User({
+            username: name,
+            email,
+            password: hashedPassword,
+        });
+        await newUser.save();
+        const token = generateToken(newUser);
+        // const response = temporaryPasswordResponse(name,tempPassword)
+        // await generateMail({
+        //     emailBody: response,
+        //     to: email,
+        //     subject: 'Welcome to Snapia!'
+        // });
+        return res.status(200).json({ message: `Welcome ${newUser.username} ,Please check mail`, token });
+    } catch (error) {
+
+    }
+}
 
 const resetPassword = async (req, res) => {
     const userID = req.user;
@@ -157,4 +195,4 @@ const addNewPassword = async (req, res) => {
 }
 
 
-module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword, generateToken }
+module.exports = { SignIn, SignUp, resetPassword, forgotPassword, addNewPassword, generateToken, generateAccountGoogleUser }

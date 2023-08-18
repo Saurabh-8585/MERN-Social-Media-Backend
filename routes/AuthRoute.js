@@ -1,6 +1,13 @@
 const express = require('express');
 const passport = require('passport');
-const { SignUp, SignIn, resetPassword, forgotPassword, addNewPassword, } = require('../controller/AuthController');
+const {
+    SignUp,
+    SignIn,
+    resetPassword,
+    forgotPassword,
+    addNewPassword,
+    generateAccountGoogleUser
+} = require('../controller/AuthController');
 const authMiddleware = require('../middleware/AuthMiddleware');
 const dotenv = require('dotenv').config();
 
@@ -12,6 +19,7 @@ router.put('/reset', authMiddleware, resetPassword);
 router.post('/forgot/password', forgotPassword);
 router.put('/new/password/:id/:token', addNewPassword);
 
+router.post('/new/google', generateAccountGoogleUser)
 // Login with Google
 router.get('/login/success', (req, res) => {
 

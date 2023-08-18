@@ -7,6 +7,7 @@ const {
     generateMail,
     resetResponse,
     forgotPasswordResponse,
+    welcomeResponse,
     temporaryPasswordResponse,
 } = require('../Mail/MailUtils');
 
@@ -33,7 +34,7 @@ const SignUp = async (req, res) => {
             password: hashedPassword,
         });
 
-        // const response = welcomeResponse(username);
+        const response = welcomeResponse(username);
         await generateMail({
             emailBody: response,
             to: email,

@@ -83,12 +83,12 @@ const generateAccountGoogleUser = async (req, res) => {
 
         let tempPassword = generatePassword();
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
-        const mailResponse = temporaryPasswordResponse(name, tempPassword)
-        await generateMail({
-            emailBody: mailResponse,
-            to: email,
-            subject: 'Welcome to Snapia!'
-        });
+        // const mailResponse = temporaryPasswordResponse(name, tempPassword)
+        // await generateMail({
+        //     emailBody: mailResponse,
+        //     to: email,
+        //     subject: 'Welcome to Snapia!'
+        // });
 
         const newUser = new User({
             username: name,

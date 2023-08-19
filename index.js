@@ -27,24 +27,24 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(logger('dev'));
 app.use(helmet());
-// app.use(cors({
-//   origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
-//   credentials: true
-// }));
+app.use(cors({
+  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+  credentials: true
+}));
 
-app.use(checkOrigin)
+// app.use(checkOrigin)
 
-// app.use(
-//   session({
-//     secret: "snapia",
-//     resave: true,
-//     saveUninitialized: true,
-//     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
-//     cookie: { maxAge: 60 * 60 * 1000 } 
-//   })
-//   );
-//   app.use(passport.initialize());
-//   app.use(passport.session());
+app.use(
+  session({
+    secret: "snapia",
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
+    cookie: { maxAge: 60 * 60 * 1000 } 
+  })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
   
   // Routes
 app.use('/api/auth', auth);

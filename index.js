@@ -28,7 +28,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(logger('dev'));
 app.use(helmet());
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+  // origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+  origin: "*",
   credentials: true
 }));
 

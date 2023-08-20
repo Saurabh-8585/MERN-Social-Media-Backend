@@ -28,8 +28,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(logger('dev'));
 app.use(helmet());
 app.use(cors({
-  // origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
-  origin: "*",
+  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+  // origin: "*",
   credentials: true
 }));
 
@@ -61,8 +61,7 @@ app.use('/api/message', message);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    // origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
-    origin: "*",
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
   },
 });
 

@@ -24,7 +24,7 @@ connectToMongo();
 const app = express();
 const port = 5000;
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(logger('dev'));
 app.use(helmet());
 app.use(cors({
@@ -35,12 +35,20 @@ app.use(cors({
 // app.use(checkOrigin)
 
 app.use(
-  session({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+  session({
+    secret: "snapia",
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
+    cookie: {
+      maxAge: 3600000,
+    },
+  })
 );
-  app.use(passport.initialize());
-  app.use(passport.session());
-  
-  // Routes
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Routes
 app.use('/api/auth', auth);
 app.use('/api/user', user);
 app.use('/api/post', post);
@@ -74,7 +82,6 @@ const getUserSocket = (userId) => {
 };
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
 
   socket.on('addUser', (userId) => {
     addUser(userId, socket.id);

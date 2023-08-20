@@ -37,10 +37,12 @@ app.use(cors({
 app.use(
   session({
     secret: "snapia",
-    resave: true,
+    resave: false,
     saveUninitialized: true,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
-    cookie: { maxAge: 60 * 60 * 1000 } 
+    cookie: {
+      maxAge: 3600000, 
+    },
   })
   );
   app.use(passport.initialize());
@@ -61,18 +63,17 @@ const io = new Server(server, {
     origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
   },
 });
-// socket-io for real time chat
+
 const connectedUsers = {};
+
 const addUser = (userId, socketId) => {
   connectedUsers[userId] = socketId;
 };
 
 const removeUser = (socketId) => {
-  for (const [userId, userSocketId] of Object.entries(connectedUsers)) {
-    if (userSocketId === socketId) {
-      delete connectedUsers[userId];
-      break;
-    }
+  const userId = Object.keys(connectedUsers).find(id => connectedUsers[id] === socketId);
+  if (userId) {
+    delete connectedUsers[userId];
   }
 };
 
@@ -80,10 +81,11 @@ const getUserSocket = (userId) => {
   return connectedUsers[userId];
 };
 
-const handleUserConnection = (socket) => {
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
   socket.on('addUser', (userId) => {
     addUser(userId, socket.id);
-
     io.emit('getUsers', Object.keys(connectedUsers));
   });
 
@@ -95,20 +97,14 @@ const handleUserConnection = (socket) => {
   socket.on('sendMessage', ({ senderId, receiverId, text }) => {
     const receiverSocketId = getUserSocket(receiverId);
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit('getMessage', {
-        senderId,
-        text,
-      });
+      io.to(receiverSocketId).emit('getMessage', { senderId, text });
     }
   });
 
   socket.on('userTyping', ({ senderId, isTyping }) => {
     socket.broadcast.emit('userTyping', { senderId, isTyping });
   });
-
-};
-io.on('connection', handleUserConnection);
-
+});
 
 server.listen(port, () => {
   console.log(`Snapia backend listening at http://localhost:${port}`);

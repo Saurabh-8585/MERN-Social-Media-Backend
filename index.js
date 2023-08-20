@@ -35,16 +35,8 @@ app.use(cors({
 // app.use(checkOrigin)
 
 app.use(
-  session({
-    secret: "snapia",
-    resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL  }),
-    cookie: {
-      maxAge: 3600000, 
-    },
-  })
-  );
+  session({ name: "session", keys: ["lama"], maxAge: 24 * 60 * 60 * 100 })
+);
   app.use(passport.initialize());
   app.use(passport.session());
   

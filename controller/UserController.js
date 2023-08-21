@@ -141,7 +141,10 @@ const updateUserProfile = async (req, res) => {
         }
 
         if (!file) {
-            if (user.userImage.public_id) {
+            const isGoogleUser = user.userImage.url.includes('googleusercontent');
+            if (isGoogleUser) {
+                user.userImage = null;
+            } else if (user.userImage.public_id) {
                 await cloudinary.uploader.destroy(user.userImage.public_id);
                 user.userImage = null;
             }
@@ -168,8 +171,8 @@ const updateUserProfile = async (req, res) => {
         user.username = username;
         if (about !== 'undefined') user.about = about;
         if (location !== 'undefined') user.location = location;
-        if (website !== 'undefined') user.website = website;+
-        await user.save();
+        if (website !== 'undefined') user.website = website; +
+            await user.save();
 
         res.status(200).json({ message: 'Profile updated successfully' });
     } catch (error) {
@@ -193,16 +196,13 @@ const deleteUser = async (req, res) => {
             await cloudinary.uploader.destroy(findUser.userImage.public_id);
         }
 
-        // Find all conversations where the user is a member
         const conversations = await Conversation.find({ members: userId });
 
-        // Delete all messages related to the user in those conversations
         await Promise.all(conversations.map(conversation => {
             return Message.deleteMany({ conversationId: conversation._id, sender: userId });
         }));
 
-        // Delete all conversations where the user is a member
-        await Conversation.deleteMany({ members: userId });
+        await Conversation.deleteMany({ members: userId }); 
 
         await BookMark.deleteMany({
             $or: [

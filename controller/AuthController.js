@@ -2,14 +2,14 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
-const { generatePassword } = require('../utils/genratePassword');
+const { generatePassword } = require('../utils/generatePassword');
+const { generateMail } = require('../Mail/MailUtils');
 const {
-    generateMail,
     resetResponse,
     forgotPasswordResponse,
     welcomeResponse,
     temporaryPasswordResponse,
-} = require('../Mail/MailUtils');
+} = require('../Mail/Templates');
 
 
 const generateToken = (user) => {
@@ -81,23 +81,33 @@ const generateAccountGoogleUser = async (req, res) => {
             return res.status(200).json({ message: `Welcome back ${existingUser.username}`, token: userToken });
         }
 
+
+
         let tempPassword = generatePassword();
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
-        // const mailResponse = temporaryPasswordResponse(name, tempPassword)
-        // await generateMail({
-        //     emailBody: mailResponse,
-        //     to: email,
-        //     subject: 'Welcome to Snapia!'
-        // });
 
         const newUser = new User({
             username: name,
             email,
             password: hashedPassword,
+            userImage: {
+                public_id: tempPassword,
+                url: picture
+            }
         });
+
         await newUser.save();
+
+
+        const mailResponse = temporaryPasswordResponse(name, tempPassword)
+
+        await generateMail({
+            emailBody: mailResponse,
+            to: email,
+            subject: 'Welcome to Snapia! Your Temporary Password and First Login Instructions'
+        });
         const token = generateToken(newUser);
-        return res.status(200).json({ message: `Welcome ${newUser.username} ,Please check mail`, token });
+        return res.status(200).json({ message: `Welcome ${name}.\nPlease check mail`, token });
     } catch (error) {
 
     }
@@ -112,22 +122,27 @@ const resetPassword = async (req, res) => {
         const user = await User.findById(userID)
 
         const comparePassword = await bcrypt.compare(oldPassword, user.password)
-
+        const isNewPasswordSame = await bcrypt.compare(newPassword, user.password,)
         if (!comparePassword) {
             return res.status(401).json({ message: 'Old password is invalid' });
         }
+        if (isNewPasswordSame) {
+            return res.status(400).json({ message: 'New password cannot be the same as the old password.' });
+        }
+
+
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         await User.findByIdAndUpdate(user, { $set: { password: hashedPassword } })
         const response = resetResponse(user.username)
-        await generateMail({
-            emailBody: response,
-            to: user.email,
-            subject: 'Password Reset Successful'
-        });
+        // await generateMail({
+        //     emailBody: response,
+        //     to: user.email,
+        //     subject: 'Password Reset Successful'
+        // });
 
-        return res.status(200).json({ message: 'Password update successfully ' });
+        return res.status(200).json({ message: 'Password updated successfully ' });
 
     } catch (error) {
         console.log(error);
@@ -153,7 +168,7 @@ const forgotPassword = async (req, res) => {
             subject: 'Forgot Password Request'
         });
 
-        res.status(201).json({ message: 'An email has been sent. Please check your inbox.' })
+        res.status(201).json({ message: 'An email has been sent.\nPlease check your inbox.' })
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'Something went wrong' });
@@ -168,10 +183,15 @@ const addNewPassword = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+
         const secretKey = user._id + process.env.JWT_SECRET
         try {
             const isValid = jwt.verify(token, secretKey);
             if (isValid) {
+                const isNewPasswordSame = await bcrypt.compare(newPassword, user.password,)
+                if (isNewPasswordSame) {
+                    return res.status(400).json({ message: 'New password cannot be the same as the old password.' });
+                }
                 const hashPassword = await bcrypt.hash(newPassword, 10);
                 await User.findByIdAndUpdate(user._id, { $set: { password: hashPassword } });
                 const response = resetResponse(user.username)

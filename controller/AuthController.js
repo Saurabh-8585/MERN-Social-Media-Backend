@@ -136,11 +136,11 @@ const resetPassword = async (req, res) => {
 
         await User.findByIdAndUpdate(user, { $set: { password: hashedPassword } })
         const response = resetResponse(user.username)
-        // await generateMail({
-        //     emailBody: response,
-        //     to: user.email,
-        //     subject: 'Password Reset Successful'
-        // });
+        await generateMail({
+            emailBody: response,
+            to: user.email,
+            subject: 'Password Reset Successful'
+        });
 
         return res.status(200).json({ message: 'Password updated successfully ' });
 

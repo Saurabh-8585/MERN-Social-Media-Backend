@@ -60,9 +60,8 @@ app.use('/api/message', message);
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  pingTimeout: 60000,
   cors: {
-    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, ],
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
   },
 });
 

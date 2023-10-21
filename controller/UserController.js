@@ -141,7 +141,7 @@ const updateUserProfile = async (req, res) => {
         }
 
         if (!file) {
-            const isGoogleUser = user.userImage.url.includes('googleusercontent');
+            const isGoogleUser = user.userImage && user.userImage.url && user.userImage.url.includes('googleusercontent');
             if (isGoogleUser) {
                 user.userImage = null;
             } else if (user.userImage.public_id) {

@@ -4,6 +4,8 @@ const BookMark = require('../models/BookMark');
 const cloudinary = require('../config/cloudinary');
 const getDataUri = require('../config/DataUri');
 const mongoose = require('mongoose');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { prompt } = require('../utils/generatePromptForPost');
 
 
 
@@ -12,7 +14,6 @@ const mongoose = require('mongoose');
 const createPost = async (req, res) => {
     const { content, postLocation } = req.body;
     const file = req.file;
-    console.log({postLocation});
     const user = await User.findById(req.user);
     try {
         let postImage = null;
@@ -20,7 +21,7 @@ const createPost = async (req, res) => {
         if (postLocation) {
             location = postLocation
         }
-        console.log({location});
+        console.log({ location });
 
         if (file) {
             const fileUri = getDataUri(file);
@@ -32,7 +33,7 @@ const createPost = async (req, res) => {
             postImage = {
                 public_id: myCloud.public_id,
                 url: myCloud.secure_url,
-            
+
             };
         }
         const newPost = new Post({
@@ -331,6 +332,25 @@ const editComment = async (req, res) => {
     }
 };
 
+const generatePostWithAI = async (req, res) => {
+    try {
+        const { style, tone, length, shortIdea } = req.body;
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+
+        const generatedPrompt = prompt(style, tone, length, shortIdea)
+        const result = await model.generateContent(generatedPrompt);
+        const data = result.response.text();
+        return res.json({
+            data: data
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+}
 
 
 
@@ -354,6 +374,7 @@ module.exports = {
     addComment,
     removeComment,
     editComment,
+    generatePostWithAI
 
 
 }

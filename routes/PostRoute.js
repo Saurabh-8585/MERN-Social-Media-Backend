@@ -12,7 +12,7 @@ const {
     addComment,
     removeComment,
     editComment,
-
+    generatePostWithAI
 }
     = require('../controller/PostController');
 const upload = require('../config/multer');
@@ -27,6 +27,8 @@ router.get('/user/:id', singleUserPosts);
 router.get('/post/:id', singlePost);
 
 router.post('/new', upload, authMiddleware, createPost);
+
+router.post('/generate_post_with_ai', authMiddleware, generatePostWithAI);
 
 router.delete('/delete/:id', authMiddleware, deletePost);
 

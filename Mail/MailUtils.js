@@ -26,6 +26,7 @@ let transporter = nodemailer.createTransport(config);
 
 
 const generateMail = async ({ emailBody, to, subject }) => {
+    return;
     try {
 
         let mail = MailGenerator.generate(emailBody);

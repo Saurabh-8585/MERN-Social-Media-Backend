@@ -1,4 +1,5 @@
 const dotenv = require('dotenv').config();
+const { frontendUrl } = require('../config/environment');
 const Mailgen = require('mailgen');
 const nodemailer = require('nodemailer');
 
@@ -16,7 +17,7 @@ let MailGenerator = new Mailgen({
     },
     product: {
         name: "Snapia",
-        link: process.env.FRONTEND_URL
+        link: frontendUrl,
     }
 });
 

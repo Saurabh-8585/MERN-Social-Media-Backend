@@ -106,10 +106,8 @@ io.on('connection', (socket) => {
   });
 });
 
-module.exports = app;
 
-if (!process.env.VERCEL) {
   server.listen(port, () => {
     console.log(`Snapia backend listening at http://localhost:${port}`);
   });
-}
+

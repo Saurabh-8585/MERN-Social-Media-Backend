@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useFollowUserMutation, useUnFollowUserMutation } from '../features/user/UserServices'
 import { toast } from 'react-hot-toast'
-import getCurrentUser from '../utils/CurrentUser'
 
 const useHandleUsersAction = ({ userInfo, user }) => {
     const [followUser,] = useFollowUserMutation()

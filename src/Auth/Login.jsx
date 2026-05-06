@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useGoogleAuthMutation, useUserSignInMutation } from '../features/auth/AuthServices';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import jwtDecode from 'jwt-decode';
 
 import { FiMail, FiLock } from 'react-icons/fi';
@@ -39,7 +39,7 @@ const Login = () => {
             }
         }
     };
-    const handleCallBackResponse = async (response) => {
+    const handleCallBackResponse = useCallback(async (response) => {
         const googleSignInToast = toast.loading('Signing in ...');
         try {
             const { email, picture, name } = jwtDecode(response.credential)
@@ -56,7 +56,7 @@ const Login = () => {
             toast.error('Something went wrong, try again', { id: googleSignInToast });
         }
 
-    }
+    }, [location.state, navigate, signInGoogle])
 
 
     useEffect(() => {
@@ -73,7 +73,7 @@ const Login = () => {
             google.accounts.id.prompt();
         }
 
-    }, []);
+    }, [handleCallBackResponse]);
 
 
     return (
@@ -96,7 +96,7 @@ const Login = () => {
                                 {...register('email', {
                                     required: 'Email is required',
                                     pattern: {
-                                        value: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                         message: 'Invalid email',
                                     },
                                 })}

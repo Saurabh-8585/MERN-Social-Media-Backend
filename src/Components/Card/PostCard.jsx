@@ -24,7 +24,7 @@ const PostCard = ({ author, content, createdAt, postId, bookmarkID, removeFromBo
         }
         return false;
 
-    }, [user]);
+    }, [user, author._id]);
 
     const { handleLike, handleRemoveLike, handleDelete, handleAddBookMark } = useHandlePostActions({ isCurrentUserAuthor })
 

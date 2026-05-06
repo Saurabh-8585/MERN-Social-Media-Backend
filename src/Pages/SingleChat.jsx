@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Avatar from '../assets/Avatar.png';
 import { FaArrowLeft } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
@@ -32,33 +32,8 @@ const SingleChat = () => {
     const [isSenderTyping, setIsSenderTyping] = useState(false);
 
 
-    useEffect(() => {
-        setupSocket();
-        // return () => {
-        //     socketRef.current.disconnect();
-        // };
-    }, []);
-
-    useEffect(() => {
-        if (!conversationLoading && !conversationData) {
-            postConversation({ senderId: currentUser, receiverId: id })
-        }
-    }, [conversationLoading, conversationData])
-
-    useEffect(() => {
-        if (!isMessageLoading && messageData) {
-            setMessages(messageData);
-
-        }
-    }, [messageData, isMessageLoading]);
-
-    useEffect(() => {
-        if (arrivalMessage) {
-            setMessages((prevMessages) => [...prevMessages, arrivalMessage]);
-        }
-    }, [arrivalMessage]);
-
-    const setupSocket = () => {
+    const setupSocket = useCallback(() => {
+        socketRef.current?.disconnect();
         socketRef.current = io(apiOrigin);
         socketRef.current.on('getMessage', ({ senderId, text }) => {
             setArrivalMessage({
@@ -74,9 +49,33 @@ const SingleChat = () => {
                 setIsSenderTyping(isTyping);
             }
         });
+    }, [currentUser, id]);
 
+    useEffect(() => {
+        setupSocket();
+        return () => {
+            socketRef.current?.disconnect();
+        };
+    }, [setupSocket]);
 
-    };
+    useEffect(() => {
+        if (!conversationLoading && !conversationData) {
+            postConversation({ senderId: currentUser, receiverId: id })
+        }
+    }, [conversationLoading, conversationData, currentUser, id, postConversation])
+
+    useEffect(() => {
+        if (!isMessageLoading && messageData) {
+            setMessages(messageData);
+
+        }
+    }, [messageData, isMessageLoading]);
+
+    useEffect(() => {
+        if (arrivalMessage) {
+            setMessages((prevMessages) => [...prevMessages, arrivalMessage]);
+        }
+    }, [arrivalMessage]);
     const sendMessage = async () => {
         pickerVisible && setPickerVisible(false)
         socketRef.current.emit('userTyping', { senderId: currentUser, isTyping: false })

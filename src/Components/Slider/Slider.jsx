@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
-const Slider = ({ }) => {
+const Slider = () => {
     const { data, isLoading } = useGetAllUsersQuery()
     const userID = getCurrentUser(sessionStorage.getItem('user'))
     const filterUser = data?.filter((user) => user._id !== userID)

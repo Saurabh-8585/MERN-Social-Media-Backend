@@ -8,7 +8,6 @@ import { toast } from 'react-hot-toast';
 import { AiOutlineLogin } from 'react-icons/ai';
 import { MdNewspaper } from 'react-icons/md';
 import PopUp from '../Components/Modal/PopUp';
-import Switcher from '../utils/Switcher';
 
 const Sidebar = () => {
     const profileId = getCurrentUser(sessionStorage.getItem('user'))

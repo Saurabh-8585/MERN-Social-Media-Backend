@@ -1,11 +1,12 @@
 // https://jsonplaceholder.typicode.com/posts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { apiEndpoints } from '../config/environment'
 
 export const ConversationApi = createApi({
     reducerPath: 'ConversationApi',
 
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.REACT_APP_CONVERSATION,
+        baseUrl: apiEndpoints.conversation,
     }),
 
     tagTypes: ['conversation'],

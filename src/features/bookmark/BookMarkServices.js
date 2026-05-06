@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { apiEndpoints } from '../config/environment'
 
 export const BookMarkApi = createApi({
     reducerPath: 'BookMarkApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.REACT_APP_BOOKMARK,
+        baseUrl: apiEndpoints.bookmark,
     }),
     tagTypes: ['User'],
     endpoints: (builder) => ({

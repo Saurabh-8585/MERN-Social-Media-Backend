@@ -11,6 +11,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Avatar from '../../assets/Avatar.png'
 import UserListPopUp from '../Modal/UserListPopUp'
 import PopUp from '../Modal/PopUp'
+import { siteOrigin } from '../../features/config/environment'
 
 const PostCard = ({ author, content, createdAt, postId, bookmarkID, removeFromBookMark, postImage, likes, comments, location }) => {
 
@@ -76,7 +77,7 @@ const PostCard = ({ author, content, createdAt, postId, bookmarkID, removeFromBo
         const data = {
             text: `${author.username} on snapia shared a post about ${content}`,
             title: 'snapia',
-            url: `${process.env.REACT_APP_URL}/post/${PostID}`,
+            url: `${siteOrigin}/post/${PostID}`,
         };
         if (postImage?.url !== undefined) {
 

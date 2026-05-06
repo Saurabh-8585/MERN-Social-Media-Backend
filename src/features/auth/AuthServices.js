@@ -1,11 +1,12 @@
 // https://jsonplaceholder.typicode.com/posts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { apiEndpoints } from '../config/environment'
 
 export const AuthApi = createApi({
     reducerPath: 'AuthApi',
 
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.REACT_APP_AUTH,
+        baseUrl: apiEndpoints.auth,
         credentials: 'include',
         headers: {
             'Accept': 'application/json',

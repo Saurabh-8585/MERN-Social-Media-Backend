@@ -16,7 +16,7 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const handleSignOut = async () => {
         try {
-            // const userLogout = await fetch(`${process.env.REACT_APP_AUTH}/logout`);
+            // const userLogout = await fetch(`${apiEndpoints.auth}/logout`);
             // if (userLogout.status === 200) {
                 sessionStorage.removeItem('user');
                 toast.success('Sign out successfully');

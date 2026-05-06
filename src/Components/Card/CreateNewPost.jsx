@@ -7,6 +7,7 @@ import { useCreatePostMutation } from '../../features/post/PostServices';
 import Location from '../Modal/Location';
 import { RiGeminiFill } from "react-icons/ri";
 import { lengths, styles, tones } from '../../Constants/AIPostWriter';
+import { apiEndpoints } from '../../features/config/environment';
 
 const AIGenerationModal = ({ onClose, onGeneratePost, user }) => {
     const [selectedStyle, setSelectedStyle] = useState('');
@@ -192,7 +193,7 @@ const CreateNewPost = () => {
             shortIdea: shortIdea,
         }
         try {
-            const res = await fetch(`${process.env.REACT_APP_POST}/generate_post_with_ai`, {
+            const res = await fetch(`${apiEndpoints.post}/generate_post_with_ai`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

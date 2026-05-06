@@ -10,6 +10,7 @@ import { getTimeAgo } from '../utils/DateFormatter';
 import { io } from 'socket.io-client';
 import { toast } from 'react-hot-toast'
 import { useGetProfileQuery } from '../features/user/UserServices';
+import { apiOrigin } from '../features/config/environment';
 
 const SingleChat = () => {
     const { id } = useParams();
@@ -58,9 +59,7 @@ const SingleChat = () => {
     }, [arrivalMessage]);
 
     const setupSocket = () => {
-        // socketRef.current = io(process.env.REACT_APP_BACKEND_URL);   
-        socketRef.current = io('ws://localhost:5000');
-        // socketRef.current = io('ws://snapia-backend.vercel.app');
+        socketRef.current = io(apiOrigin);
         socketRef.current.on('getMessage', ({ senderId, text }) => {
             setArrivalMessage({
                 sender: senderId,

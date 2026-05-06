@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiEndpoints } from "../config/environment";
 
 export const PostApi = createApi({
     reducerPath: 'PostApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: process.env.REACT_APP_POST,
+        baseUrl: apiEndpoints.post,
     }),
     tagTypes: ['Posts', 'SinglePost', 'Comments'],
     endpoints: (builder) => ({

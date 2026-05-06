@@ -9,6 +9,7 @@ import UserListPopUp from '../Modal/UserListPopUp';
 import PopUp from '../Modal/PopUp';
 import { FaUserTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import { siteOrigin } from '../../features/config/environment';
 const ProfileCard = ({ userInfo, totalPosts, userId }) => {
 
     const user = getCurrentUser(sessionStorage.getItem('user'))
@@ -25,7 +26,7 @@ const ProfileCard = ({ userInfo, totalPosts, userId }) => {
         const data = {
             text: `${userInfo.username} on snapia`,
             title: 'snapia',
-            url: `${process.env.REACT_APP_URL}/profile/${userId}`,
+            url: `${siteOrigin}/profile/${userId}`,
         };
         if (userInfo?.userImage?.url !== undefined) {
 

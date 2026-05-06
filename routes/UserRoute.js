@@ -15,10 +15,9 @@ const { deleteUser,
 const router = express.Router();
 
 
-
+router.get('/all/users', getAllUsersData);
 
 router.get('/:id', getSingleUserData);
-
 
 router.put('/follow/:id', authMiddleware, followUser);
 
@@ -27,7 +26,5 @@ router.delete('/unfollow/:id', authMiddleware, unFollowUser);
 router.put('/update/:id', authMiddleware, upload, updateUserProfile)
 
 router.delete('/deleteuser', authMiddleware, deleteUser);
-
-router.get('/all/users', getAllUsersData);
 
 module.exports = router

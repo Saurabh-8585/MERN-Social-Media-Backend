@@ -29,8 +29,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(logger('dev'));
 app.use(helmet());
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
-  // origin: "*",
+  origin: corsOrigins,
   credentials: true
 }));
 
@@ -107,6 +106,10 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(port, () => {
-  console.log(`Snapia backend listening at http://localhost:${port}`);
-});
+module.exports = app;
+
+if (!process.env.VERCEL) {
+  server.listen(port, () => {
+    console.log(`Snapia backend listening at http://localhost:${port}`);
+  });
+}

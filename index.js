@@ -1,4 +1,5 @@
 const dotenv = require('dotenv').config();
+const { corsOrigins } = require('./config/environment');
 const express = require('express');
 const http = require('http');
 const connectToMongo = require('./database/db');
@@ -61,7 +62,7 @@ app.use('/api/message', message);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_2, process.env.BACKEND_URL],
+    origin: corsOrigins,
   },
 });
 

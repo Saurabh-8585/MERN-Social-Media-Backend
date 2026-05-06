@@ -2,6 +2,7 @@ const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv').config();
+const { frontendUrl } = require('../config/environment');
 const { generatePassword } = require('../utils/generatePassword');
 const { generateMail } = require('../Mail/MailUtils');
 const {
@@ -160,7 +161,7 @@ const forgotPassword = async (req, res) => {
         }
         const secretKey = user._id + process.env.JWT_SECRET;
         const token = jwt.sign({ userID: user._id }, secretKey, { expiresIn: '5m' });
-        const link = `${process.env.FRONTEND_URL}/reset-password/${user._id}/${token}`;
+        const link = `${frontendUrl}/reset-password/${user._id}/${token}`;
         const response = forgotPasswordResponse(user.username, link)
         await generateMail({
             emailBody: response,

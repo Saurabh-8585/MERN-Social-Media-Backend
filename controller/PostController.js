@@ -336,7 +336,7 @@ const generatePostWithAI = async (req, res) => {
     try {
         const { style, tone, length, shortIdea } = req.body;
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 
         const generatedPrompt = prompt(style, tone, length, shortIdea)

@@ -10,6 +10,7 @@ const {
 } = require('../controller/AuthController');
 const authMiddleware = require('../middleware/AuthMiddleware');
 const dotenv = require('dotenv').config();
+const { frontendUrl } = require('../config/environment');
 
 const router = express.Router();
 
@@ -54,7 +55,7 @@ router.get('/logout', (req, res) => {
         if (err) {
             return res.status(500).json({ error: true, message: 'Logout failed' });
         }
-        res.redirect(process.env.FRONTEND_URL);
+        res.redirect(frontendUrl);
     });
 });
 

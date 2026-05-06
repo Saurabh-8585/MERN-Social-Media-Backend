@@ -1,12 +1,7 @@
 const dotenv = require('dotenv').config();
+const { allowedOrigins } = require('../config/environment');
+
 function checkOrigin(req, res, next) {
-    const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        process.env.FRONTEND_URL_2,
-        process.env.BACKEND_URL,
-        'https://accounts.google.com',
-        'https://oauth2.googleapis.com',
-    ];
 
     const origin = req.headers.origin;
 console.log({origin});

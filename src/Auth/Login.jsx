@@ -153,7 +153,7 @@ const Login = () => {
                     </div>
                 </div>
                 <div className="text-center my-6 flex flex-col">
-                    {/* Temporarily hidden — re-enable when forgot-password email flow is ready */}
+                    {/* Temporarily hidden — re-enable when forgot-password email flow is ready. */}
                     {/*
                     <Link to="/forgot-password" className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-purple-500 m-1">
                         Forgot Password?
